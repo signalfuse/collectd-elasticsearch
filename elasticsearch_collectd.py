@@ -19,10 +19,19 @@ import json
 import urllib2
 
 PREFIX = "elasticsearch"
-ES_CLUSTER = "elasticsearch"
 ES_HOST = "localhost"
 ES_PORT = 9200
 ES_VERSION = None
+ES_CLUSTER = set_default_es_cluster()
+
+def set_default_es_cluster():
+        global ES_CLUSTER
+        json = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT))
+        if json:
+                ES_CLUSTER = json["cluster_name"]
+        else:
+                ES_CLUSTER = "elasticsearch"
+
 
 ENABLE_INDEX_STATS = True
 ENABLE_CLUSTER_STATS = True
