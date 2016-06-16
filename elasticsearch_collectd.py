@@ -45,6 +45,247 @@ COLLECTION_INTERVAL = 10
 
 CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
+DETAILED_METRICS = False
+
+DEFAULTS = {
+    # PAGE: Elasticsearch
+
+    # DASHBOARD: Elasticsearch Node
+
+    # CHART: Requests/sec
+    "indices.search.query-total",
+    "indices.indexing.index-total",
+    "indices.get.total",
+
+    # CHART: Document Growth Rate %
+    "indices.docs.count",
+    "indices.docs.count",
+    "indices.docs.count",
+    "indices.docs.count",
+
+    # CHART: Indexing Requests/sec
+    "indices.indexing.index-total",
+
+    # CHART: Average Query Latency (ms)
+    "indices.search.query-total",
+    "indices.search.query-time",
+
+    # CHART: File Descriptors and Segments
+    "process.open_file_descriptors",
+    "indices.segments.count",
+
+    # CHART: Memory Heap Size (bytes)
+    "jvm.mem.heap-used",
+    "jvm.mem.heap-committed",
+
+    # CHART: Active Merges
+    "indices.merges.current",
+
+    # CHART: Search Requests/sec
+    "indices.search.query-total",
+
+    # CHART: Merges/sec
+    "indices.merges.total",
+
+    # CHART: Thread Pool Rejections
+    "thread_pool.bulk.rejected",
+    "thread_pool.flush.rejected",
+    "thread_pool.generic.rejected",
+    "thread_pool.get.rejected",
+    "thread_pool.index.rejected",
+    "thread_pool.merge.rejected",
+    "thread_pool.optimize.rejected",
+    "thread_pool.refresh.rejected",
+    "thread_pool.search.rejected",
+    "thread_pool.snapshot.rejected",
+
+    # CHART: Cache Sizes (bytes)
+    "indices.cache.filter.size",
+    "indices.cache.field.size",
+
+    # CHART: GC Time %
+    "jvm.gc.time",
+    "jvm.uptime",
+
+    # DASHBOARD: Elasticsearch
+
+    # CHART: Top Clusters by Query Latency (ms)
+    "indices.search.query-total",
+    "indices.search.query-time",
+    "indices.search.query-total",
+    "indices.search.query-time",
+
+    # CHART: Top Clusters by Indexing Requests
+    "indices.indexing.index-total",
+
+    # CHART: Merges/sec
+    "indices.merges.total",
+
+    # CHART: # Hosts/Clusters
+    "indices.indexing.index-total",
+    "indices.indexing.index-total",
+
+    # CHART: Thread Pool Rejections
+    "thread_pool.bulk.rejected",
+    "thread_pool.flush.rejected",
+    "thread_pool.generic.rejected",
+    "thread_pool.get.rejected",
+    "thread_pool.index.rejected",
+    "thread_pool.merge.rejected",
+    "thread_pool.optimize.rejected",
+    "thread_pool.refresh.rejected",
+    "thread_pool.search.rejected",
+    "thread_pool.snapshot.rejected",
+
+    # CHART: Search Requests
+    "indices.search.query-total",
+
+    # CHART: GC Time %
+    "jvm.gc.time",
+    "jvm.uptime",
+    "jvm.gc.time",
+    "jvm.uptime",
+
+    # CHART: Deleted Documents %
+    "indices.docs.deleted",
+    "indices.docs.count",
+
+    # CHART: Document Growth %
+    "indices.docs.count",
+    "indices.docs.count",
+
+    # CHART: Cache Size (bytes)
+    "indices.cache.filter.size",
+    "indices.cache.field.size",
+
+    # CHART: Top Clusters by Index Growth %
+    "indices.store.size",
+    "indices.store.size",
+
+    # CHART: Top Clusters by Search Requests
+    "indices.search.query-total",
+
+    # CHART: Indexing Requests
+    "indices.indexing.index-total",
+
+    # CHART: Heap %
+    "jvm.mem.heap-used",
+    "jvm.mem.heap-committed",
+
+    # DASHBOARD: Elasticsearch Cluster
+
+    # CHART: Thread Pool Rejections
+    "thread_pool.bulk.rejected",
+    "thread_pool.flush.rejected",
+    "thread_pool.generic.rejected",
+    "thread_pool.get.rejected",
+    "thread_pool.index.rejected",
+    "thread_pool.merge.rejected",
+    "thread_pool.optimize.rejected",
+    "thread_pool.refresh.rejected",
+    "thread_pool.search.rejected",
+    "thread_pool.snapshot.rejected",
+
+    # CHART: Deleted Documents %
+    "indices.total.docs.deleted",
+    "indices.total.docs.count",
+
+    # CHART: GC Time %
+    "jvm.gc.time",
+    "jvm.uptime",
+    "jvm.gc.time",
+    "jvm.uptime",
+
+    # CHART: # Nodes
+    "cluster.number-of-nodes",
+    "cluster.number-of-data_nodes",
+
+    # CHART: Cache Size (bytes)
+    "indices.total.filter-cache.memory-size",
+    "indices.total.fielddata.memory-size",
+
+    # CHART: Heap %
+    "jvm.mem.heap-used",
+    "jvm.mem.heap-committed",
+
+    # CHART: Cluster Shard Allocation
+    "cluster.unassigned-shards",
+    "cluster.relocating-shards",
+    "cluster.active-primary-shards",
+    "cluster.active-shards",
+
+    # PAGE: Elasticsearch Index
+
+    # DASHBOARD: Elasticsearch Indexes
+
+    # CHART: Top Indexes by Indexing Requests
+    "indices.total.indexing.index-total",
+
+    # CHART: Merges/sec
+    "indices.total.merges.total",
+
+    # CHART: Top Indexes by Search Requests
+    "indices.total.search.query-total",
+
+    # CHART: Search Requests/sec
+    "indices.total.search.query-total",
+
+    # CHART: Indexing Requests/sec
+    "indices.total.indexing.index-total",
+
+    # CHART: Top Indexes by Index Size Growth %
+    "indices.total.store.size",
+    "indices.total.store.size",
+
+    # CHART: Top Indexes by Query Latency (ms)
+    "indices.total.search.query-total",
+    "indices.total.search.query-time",
+
+    # CHART: Document Growth %
+    "indices.total.docs.count",
+
+    # DASHBOARD: Elasticsearch Index
+
+    # CHART: Deleted Documents %
+    "indices.total.docs.deleted",
+    "indices.total.docs.count",
+
+    # CHART: Cache Size (bytes)
+    "indices.total.filter-cache.memory-size",
+    "indices.total.fielddata.memory-size",
+
+    # CHART: Merge Latency (ms)
+    "indices.total.merges.total",
+    "indices.total.merges.total-time",
+
+    # CHART: Search Requests/sec
+    "indices.total.search.query-total",
+
+    # CHART: Elasticsearch Tips
+
+    # CHART: Index Statistics
+    "indices.total.store.size",
+    "indices.total.store.size",
+    "indices.total.docs.count",
+
+    # CHART: Search Latency (ms)
+    "indices.total.search.query-total",
+    "indices.total.search.query-time",
+
+    # CHART: Index Latency (ms)
+    "indices.total.indexing.index-total",
+    "indices.total.indexing.index-time",
+
+    # CHART: Merges/sec
+    "indices.total.merges.total",
+
+    # CHART: Indexing Requests/sec
+    "indices.total.indexing.index-total",
+
+    # CHART: Document Growth %
+    "indices.total.docs.count",
+}
+
 # DICT: ElasticSearch 1.0.0
 NODE_STATS = {
     # STORE
@@ -514,18 +755,34 @@ def read_callback():
     fetch_stats()
 
 
+def _bool(value):
+    """Python 2.x does not have a casting mechanism for booleans.  The built in
+    bool() will return true for any string with a length greater than 0.  It
+    does not cast a string with the text "true" or "false" to the
+    corresponding bool value.  This method is a casting function.  It is
+    insensetive to case and leading/trailing spaces.  An Exception is raised
+    if a cast can not be made.
+    """
+    if str(value).strip().lower() in "true":
+        return True
+    elif str(value).strip().lower() in "false":
+        return False
+    else:
+        raise Exception("Unable to cast value (%s) to boolean" % value)
+
+
 def configure_callback(conf):
     """called by collectd to configure the plugin. This is called only once"""
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, VERBOSE_LOGGING, \
-        ES_CLUSTER, \
-        ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, COLLECTION_INTERVAL
+        ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
+        DETAILED_METRICS, COLLECTION_INTERVAL
     for node in conf.children:
         if node.key == 'Host':
             ES_HOST = node.values[0]
         elif node.key == 'Port':
             ES_PORT = int(node.values[0])
         elif node.key == 'Verbose':
-            VERBOSE_LOGGING = bool(node.values[0])
+            VERBOSE_LOGGING = _bool(node.values[0])
         elif node.key == 'Cluster':
             ES_CLUSTER = node.values[0]
             collectd.info(
@@ -537,11 +794,13 @@ def configure_callback(conf):
         elif node.key == 'Indexes':
             ES_INDEX = node.values
         elif node.key == 'EnableIndexStats':
-            ENABLE_INDEX_STATS = bool(node.values[0])
+            ENABLE_INDEX_STATS = _bool(node.values[0])
         elif node.key == 'EnableClusterHealth':
-            ENABLE_CLUSTER_STATS = bool(node.values[0])
+            ENABLE_CLUSTER_STATS = _bool(node.values[0])
         elif node.key == 'Interval':
             COLLECTION_INTERVAL = int(node.values[0])
+        elif node.key == "DetailedMetrics":
+            DETAILED_METRICS = _bool(node.values[0])
         else:
             collectd.warning('elasticsearch plugin: Unknown config key: %s.'
                              % node.key)
@@ -708,8 +967,9 @@ eligible: %s"
 def parse_node_stats(json, stats):
     """Parse node stats response from ElasticSearch"""
     for name, key in stats.iteritems():
-        result = lookup_node_stat(name, json)
-        dispatch_stat(result, name, key)
+        if DETAILED_METRICS is True or name in DEFAULTS:
+            result = lookup_node_stat(name, json)
+            dispatch_stat(result, name, key)
 
 
 def parse_cluster_stats(json, stats):
@@ -717,18 +977,22 @@ def parse_cluster_stats(json, stats):
     # convert the status color into a number
     json['status'] = CLUSTER_STATUS[json['status']]
     for name, key in stats.iteritems():
-        result = dig_it_up(json, key.path)
-        dispatch_stat(result, name, key)
+        if DETAILED_METRICS is True or name in DEFAULTS:
+            result = dig_it_up(json, key.path)
+            dispatch_stat(result, name, key)
 
 
 def parse_index_stats(json, index_name):
     """Parse index stats response from ElasticSearch"""
     for name, key in INDEX_STATS_CUR.iteritems():
-        result = dig_it_up(json, key.path)
-        # update the index name in the type_instance to include
-        # the index as a dimensions
-        name = name.format(index_name=sanitize_type_instance(index_name))
-        dispatch_stat(result, name, key)
+        # filter default metrics
+        if DETAILED_METRICS is True or \
+           name.replace("[index={index_name}]", "") in DEFAULTS:
+            result = dig_it_up(json, key.path)
+            # update the index name in the type_instance to include
+            # the index as a dimensions
+            name = name.format(index_name=sanitize_type_instance(index_name))
+            dispatch_stat(result, name, key)
 
 
 def sanitize_type_instance(index_name):
