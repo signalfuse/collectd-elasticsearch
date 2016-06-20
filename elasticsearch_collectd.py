@@ -476,6 +476,16 @@ NODE_STATS = {
         Stat("gauge", "nodes.%s.process.mem.share_in_bytes"),
 }
 
+# Deprecated node stats by first version in which they were removed
+DEPRECATED_NODE_STATS = [
+    {
+        'major': 2,
+        'minor': 0,
+        'revision': 0,
+        'keys': ['process.mem.share_in_bytes'],
+    },
+]
+
 NODE_STATS_ES_2 = {
     'indices.cache.filter.evictions':
         Stat("counter", "nodes.%s.indices.query_cache.evictions"),
@@ -832,7 +842,8 @@ def init_stats():
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_CLUSTER_URL, ES_INDEX_URL, \
         ES_VERSION, VERBOSE_LOGGING, NODE_STATS_CUR, INDEX_STATS_CUR, \
         CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
-        INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT
+        INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT, \
+        DEPRECATED_NODE_STATS
 
     # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
     # ? INDEX_INTERVAL == COLLECTION_INTERVAL: # pass
@@ -871,6 +882,21 @@ rounded to: %s" % INDEX_INTERVAL)
     if ES_VERSION.startswith("2."):
         NODE_STATS_CUR.update(NODE_STATS_ES_2)
 
+    # Attempt to parse the major, minor, and revision
+    major = ES_VERSION.split('.')[0]
+    minor = ES_VERSION.split('.')[1]
+    revision = ES_VERSION.split('.')[2]
+
+    # Iterate over deprecation lists and remove any keys that were deprecated
+    # prior to the current version
+    for dep in DEPRECATED_NODE_STATS:
+        if (major >= dep['major']) \
+            or (major == dep['major'] and minor >= dep['minor']) \
+            or (major == dep['major'] and minor == dep['minor'] and
+                revision >= dep['revision']):
+            for key in dep['keys']:
+                del NODE_STATS_CUR[key]
+
     if ES_VERSION.startswith("1.1") or ES_VERSION.startswith("1.2"):
         INDEX_STATS_CUR.update(INDEX_STATS_ES_1_1)
     else:
@@ -892,8 +918,9 @@ rounded to: %s" % INDEX_INTERVAL)
 
     if ES_VERSION.startswith("2."):
         thread_pools.extend(['suggest', 'percolate', 'management', 'listener',
-                             'force_merge', 'fetch_shard_store',
-                             'fetch_shard_started'])
+                             'fetch_shard_store', 'fetch_shard_started'])
+    elif ES_VERSION.startswith("2.") and not ES_VERSION.startswith("2.0"):
+        thread_pools.extend(['force_merge'])
     else:
         thread_pools.extend(['merge', 'optimize'])
 
