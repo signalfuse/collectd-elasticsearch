@@ -43,9 +43,15 @@ CLUSTER_STATS_CUR = {}
 
 COLLECTION_INTERVAL = 10
 
+INDEX_INTERVAL = 300
+
+INDEX_SKIP = 0
+
+SKIP_COUNT = 0
+
 CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
-DETAILED_METRICS = False
+DETAILED_METRICS = True
 
 DEFAULTS = {
     # PAGE: Elasticsearch
@@ -775,7 +781,8 @@ def configure_callback(conf):
     """called by collectd to configure the plugin. This is called only once"""
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, VERBOSE_LOGGING, \
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
-        DETAILED_METRICS, COLLECTION_INTERVAL
+        DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL
+
     for node in conf.children:
         if node.key == 'Host':
             ES_HOST = node.values[0]
@@ -799,6 +806,8 @@ def configure_callback(conf):
             ENABLE_CLUSTER_STATS = _bool(node.values[0])
         elif node.key == 'Interval':
             COLLECTION_INTERVAL = int(node.values[0])
+        elif node.key == 'IndexInterval':
+            INDEX_INTERVAL = int(node.values[0])
         elif node.key == "DetailedMetrics":
             DETAILED_METRICS = _bool(node.values[0])
         else:
@@ -822,7 +831,38 @@ def configure_callback(conf):
 def init_stats():
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_CLUSTER_URL, ES_INDEX_URL, \
         ES_VERSION, VERBOSE_LOGGING, NODE_STATS_CUR, INDEX_STATS_CUR, \
-        CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS
+        CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
+        INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT
+
+    # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
+    # ? INDEX_INTERVAL == COLLECTION_INTERVAL: # pass
+    if INDEX_INTERVAL != COLLECTION_INTERVAL:
+        # Notify the user that the INDEX_INTERVAL must be divisible by
+        # the COLLECTION_INTERVAL
+        collectd.info("WARN: The Elasticsearch Index Interval must be greater \
+or equal to than and divisible by the collection Interval")
+    # ? INDEX_INTERVAL > COLLECTION_INTERVAL: Round up INDEX_INTERVAL
+    if INDEX_INTERVAL > COLLECTION_INTERVAL:
+        # ? INDEX_INTERVAL % COLLECTION_INTERVAL > 0:
+        if INDEX_INTERVAL % COLLECTION_INTERVAL > 0:
+            INDEX_INTERVAL = INDEX_INTERVAL + COLLECTION_INTERVAL - \
+                              (INDEX_INTERVAL % COLLECTION_INTERVAL)
+            collectd.info("WARN: The Elasticsearch Index Interval has been \
+rounded to: %s" % INDEX_INTERVAL)
+
+    # ? INDEX_INTERVAL < COLLECTION_INTERVAL :
+    #   Set INDEX_INTERVAL = COLLECTION_INTERVAL
+    elif INDEX_INTERVAL < COLLECTION_INTERVAL:
+        INDEX_INTERVAL = COLLECTION_INTERVAL
+        collectd.info("WARN: The Elasticsearch Index Interval has been \
+rounded to: %s" % INDEX_INTERVAL)
+
+    # INDEX_SKIP = INDEX_INTERVAL / COLLECTION_INTERVAL
+    INDEX_SKIP = (INDEX_INTERVAL / COLLECTION_INTERVAL)
+
+    # ENSURE INDEX IS COLLECTED ON THE FIRST COLLECTION
+    SKIP_COUNT = INDEX_SKIP
+
     ES_NODE_URL = "http://" + ES_HOST + ":" + str(ES_PORT) + \
                   "/_nodes/_local/stats/transport,http,process,jvm,indices," \
                   "thread_pool"
@@ -891,7 +931,7 @@ def fetch_stats():
     fetches all required stats from ElasticSearch. This method also sets
     ES_CLUSTER
     """
-    global ES_CLUSTER
+    global ES_CLUSTER, SKIP_COUNT, INDEX_SKIP
 
     node_json_stats = fetch_url(ES_NODE_URL)
     if node_json_stats:
@@ -905,12 +945,16 @@ def fetch_stats():
         cluster_json_stats = fetch_url(ES_CLUSTER_URL)
         parse_cluster_stats(cluster_json_stats, CLUSTER_STATS)
 
-    if ENABLE_INDEX_STATS and ES_MASTER_ELIGIBLE:
+    if ENABLE_INDEX_STATS and ES_MASTER_ELIGIBLE and SKIP_COUNT >= INDEX_SKIP:
+        # Reset skip count
+        SKIP_COUNT = 0
         indices = fetch_url(ES_INDEX_URL)
         if indices:
             indexes_json_stats = indices['indices']
             for index_name in indexes_json_stats.keys():
                 parse_index_stats(indexes_json_stats[index_name], index_name)
+    # Incrememnt skip count
+    SKIP_COUNT += 1
 
 
 def fetch_url(url):
