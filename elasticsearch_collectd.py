@@ -847,7 +847,7 @@ def init_stats():
 
     # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
     # ? INDEX_INTERVAL > COLLECTION_INTERVAL:
-    # check if INDEX_INTERVAL is cleanly divisible by COLLECTION_INTERVAL
+    # check if INDEX_INTERVAL is divisible by COLLECTION_INTERVAL
     if INDEX_INTERVAL > COLLECTION_INTERVAL:
         # ? INDEX_INTERVAL % COLLECTION_INTERVAL > 0:
         # round the INDEX_INTERVAL up to a compatible value
