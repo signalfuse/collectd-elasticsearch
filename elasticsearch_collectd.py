@@ -846,27 +846,25 @@ def init_stats():
         DEPRECATED_NODE_STATS
 
     # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
-    # ? INDEX_INTERVAL == COLLECTION_INTERVAL: # pass
-    if INDEX_INTERVAL != COLLECTION_INTERVAL:
-        # Notify the user that the INDEX_INTERVAL must be divisible by
-        # the COLLECTION_INTERVAL
-        collectd.info("WARN: The Elasticsearch Index Interval must be greater \
-or equal to than and divisible by the collection Interval")
-    # ? INDEX_INTERVAL > COLLECTION_INTERVAL: Round up INDEX_INTERVAL
+    # ? INDEX_INTERVAL > COLLECTION_INTERVAL:
+    # check if INDEX_INTERVAL is cleanly divisible by COLLECTION_INTERVAL
     if INDEX_INTERVAL > COLLECTION_INTERVAL:
         # ? INDEX_INTERVAL % COLLECTION_INTERVAL > 0:
+        # round the INDEX_INTERVAL up to a compatible value
         if INDEX_INTERVAL % COLLECTION_INTERVAL > 0:
             INDEX_INTERVAL = INDEX_INTERVAL + COLLECTION_INTERVAL - \
                               (INDEX_INTERVAL % COLLECTION_INTERVAL)
-            collectd.info("WARN: The Elasticsearch Index Interval has been \
-rounded to: %s" % INDEX_INTERVAL)
+            collectd.info("WARN: The Elasticsearch Index Interval must be \
+greater or equal to than and divisible by the collection Interval.  The \
+Elasticsearch Index Interval has been rounded to: %s" % INDEX_INTERVAL)
 
     # ? INDEX_INTERVAL < COLLECTION_INTERVAL :
     #   Set INDEX_INTERVAL = COLLECTION_INTERVAL
     elif INDEX_INTERVAL < COLLECTION_INTERVAL:
         INDEX_INTERVAL = COLLECTION_INTERVAL
-        collectd.info("WARN: The Elasticsearch Index Interval has been \
-rounded to: %s" % INDEX_INTERVAL)
+        collectd.info("WARN: The Elasticsearch Index Interval must be greater \
+or equal to than and divisible by the collection Interval.  The Elasticsearch \
+Index Interval has been rounded to: %s" % INDEX_INTERVAL)
 
     # INDEX_SKIP = INDEX_INTERVAL / COLLECTION_INTERVAL
     INDEX_SKIP = (INDEX_INTERVAL / COLLECTION_INTERVAL)
