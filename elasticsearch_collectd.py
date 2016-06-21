@@ -52,7 +52,9 @@ SKIP_COUNT = 0
 CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
 DETAILED_METRICS = True
+THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set(['search', 'index'])
+
 
 DEFAULTS = {
     # PAGE: Elasticsearch
@@ -761,6 +763,12 @@ CLUSTER_STATS = {
     'cluster.status': Stat("gauge", "status"),
 }
 
+# Thread pool metrics
+THREAD_POOL_METRICS = {
+    "gauge": ['threads', 'queue', 'active', 'largest'],
+    "counter": ['completed', 'rejected'],
+}
+
 
 # collectd callbacks
 def read_callback():
@@ -823,7 +831,10 @@ def configure_callback(conf):
         elif node.key == "DetailedMetrics":
             DETAILED_METRICS = _bool(node.values[0])
         elif node.key == "AdditionalThreadPools":
-            CONFIGURED_THREAD_POOLS.union(set(node.values))
+            for i in node.values:
+                CONFIGURED_THREAD_POOLS.add(i)
+            log_verbose('CONFIGURED_THREAD_POOLS: %s' %
+                        CONFIGURED_THREAD_POOLS)
         else:
             collectd.warning('elasticsearch plugin: Unknown config key: %s.'
                              % node.key)
@@ -847,7 +858,7 @@ def init_stats():
         ES_VERSION, VERBOSE_LOGGING, NODE_STATS_CUR, INDEX_STATS_CUR, \
         CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT, \
-        DEPRECATED_NODE_STATS
+        DEPRECATED_NODE_STATS, THREAD_POOLS
 
     # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
     # ? INDEX_INTERVAL > COLLECTION_INTERVAL:
@@ -928,19 +939,8 @@ Index Interval has been rounded to: %s" % INDEX_INTERVAL)
         thread_pools.extend(['merge', 'optimize'])
 
     # Filter out the thread pools that aren't specified by user
-    thread_pools = filter(lambda pool: pool in CONFIGURED_THREAD_POOLS,
+    THREAD_POOLS = filter(lambda pool: pool in CONFIGURED_THREAD_POOLS,
                           thread_pools)
-
-    # add info on thread pools (applicable for all versions)
-    for pool in thread_pools:
-        for attr in ['threads', 'queue', 'active', 'largest']:
-            path = 'thread_pool.{0}.{1}'.format(pool, attr)
-            NODE_STATS_CUR[path] = \
-                Stat("gauge", 'nodes.%s.{0}'.format(path))
-        for attr in ['completed', 'rejected']:
-            path = 'thread_pool.{0}.{1}'.format(pool, attr)
-            NODE_STATS_CUR[path] = \
-                Stat("counter", 'nodes.%s.{0}'.format(path))
 
     ES_CLUSTER_URL = "http://" + ES_HOST + \
                      ":" + str(ES_PORT) + "/_cluster/health"
@@ -967,13 +967,16 @@ def fetch_stats():
     fetches all required stats from ElasticSearch. This method also sets
     ES_CLUSTER
     """
-    global ES_CLUSTER, SKIP_COUNT, INDEX_SKIP
+    global ES_CLUSTER, SKIP_COUNT, INDEX_SKIP, THREAD_POOLS
 
     node_json_stats = fetch_url(ES_NODE_URL)
     if node_json_stats:
         ES_CLUSTER = node_json_stats['cluster_name']
         log_verbose('Configured with cluster_json_stats=%s' % ES_CLUSTER)
+        log_verbose('Parsing node_json_stats')
         parse_node_stats(node_json_stats, NODE_STATS_CUR)
+        log_verbose('Parsing thread pool stats')
+        parse_thread_pool_stats(node_json_stats, THREAD_POOLS)
 
     # load cluster and index stats only on master eligible nodes, this
     # avoids collecting too many metrics if the cluster has a lot of nodes
@@ -1052,6 +1055,27 @@ def parse_node_stats(json, stats):
             dispatch_stat(result, name, key)
 
 
+def parse_thread_pool_stats(json, stats):
+    """Parse thread pool stats response from ElasticSearch"""
+    for pool in THREAD_POOLS:
+        for metric_type, value in THREAD_POOL_METRICS.iteritems():
+            for attr in value:
+                name = 'thread_pool.{0}'.format(attr)
+                key = Stat(metric_type, 'nodes.%s.thread_pool.{0}.{1}'.
+                           format(pool, attr))
+                if DETAILED_METRICS is True or name in DEFAULTS:
+                    node = json['nodes'].keys()[0]
+                    result = dig_it_up(json, key.path % node)
+                    # Check to make sure we have a valid result
+                    # dig_it_up returns False if no match found
+                    if not isinstance(result, bool):
+                        result = int(result)
+                    else:
+                        result = None
+
+                    dispatch_stat(result, name, key, {'thread_pool': pool})
+
+
 def parse_cluster_stats(json, stats):
     """Parse cluster stats response from ElasticSearch"""
     # convert the status color into a number
@@ -1086,7 +1110,7 @@ def sanitize_type_instance(index_name):
     return ascii_index_name.replace('/', '_')
 
 
-def dispatch_stat(result, name, key):
+def dispatch_stat(result, name, key, dimensions=None):
     """Read a key from info response data and dispatch a value"""
     if result is None:
         collectd.warning('elasticsearch plugin: Value not found for %s' % name)
@@ -1097,6 +1121,11 @@ def dispatch_stat(result, name, key):
 
     val = collectd.Values(plugin='elasticsearch')
     val.plugin_instance = ES_CLUSTER
+
+    if dimensions:
+        val.plugin_instance += '[{dims}]'.format(dims=','.join(['='.join(d)
+                                                 for d in dimensions.items()]))
+
     val.type = estype
     val.type_instance = name
     val.values = [value]
