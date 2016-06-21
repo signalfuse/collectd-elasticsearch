@@ -52,6 +52,7 @@ SKIP_COUNT = 0
 CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
 DETAILED_METRICS = True
+CONFIGURED_THREAD_POOLS = set(['search', 'index'])
 
 DEFAULTS = {
     # PAGE: Elasticsearch
@@ -791,7 +792,8 @@ def configure_callback(conf):
     """called by collectd to configure the plugin. This is called only once"""
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, VERBOSE_LOGGING, \
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
-        DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL
+        DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
+        CONFIGURED_THREAD_POOLS
 
     for node in conf.children:
         if node.key == 'Host':
@@ -820,6 +822,8 @@ def configure_callback(conf):
             INDEX_INTERVAL = int(node.values[0])
         elif node.key == "DetailedMetrics":
             DETAILED_METRICS = _bool(node.values[0])
+        elif node.key == "AdditionalThreadPools":
+            CONFIGURED_THREAD_POOLS.union(set(node.values))
         else:
             collectd.warning('elasticsearch plugin: Unknown config key: %s.'
                              % node.key)
@@ -910,6 +914,7 @@ Index Interval has been rounded to: %s" % INDEX_INTERVAL)
     else:
         ES_INDEX_URL = "http://" + ES_HOST + ":" + \
                        str(ES_PORT) + "/" + ",".join(ES_INDEX) + "/_stats"
+
     # common thread pools for all ES versions
     thread_pools = ['generic', 'index', 'get', 'snapshot', 'bulk', 'warmer',
                     'flush', 'search', 'refresh']
@@ -922,14 +927,20 @@ Index Interval has been rounded to: %s" % INDEX_INTERVAL)
     else:
         thread_pools.extend(['merge', 'optimize'])
 
+    # Filter out the thread pools that aren't specified by user
+    thread_pools = filter(lambda pool: pool in CONFIGURED_THREAD_POOLS,
+                          thread_pools)
+
     # add info on thread pools (applicable for all versions)
     for pool in thread_pools:
         for attr in ['threads', 'queue', 'active', 'largest']:
             path = 'thread_pool.{0}.{1}'.format(pool, attr)
-            NODE_STATS_CUR[path] = Stat("gauge", 'nodes.%s.{0}'.format(path))
+            NODE_STATS_CUR[path] = \
+                Stat("gauge", 'nodes.%s.{0}'.format(path))
         for attr in ['completed', 'rejected']:
             path = 'thread_pool.{0}.{1}'.format(pool, attr)
-            NODE_STATS_CUR[path] = Stat("counter", 'nodes.%s.{0}'.format(path))
+            NODE_STATS_CUR[path] = \
+                Stat("counter", 'nodes.%s.{0}'.format(path))
 
     ES_CLUSTER_URL = "http://" + ES_HOST + \
                      ":" + str(ES_PORT) + "/_cluster/health"
