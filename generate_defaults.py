@@ -49,7 +49,9 @@ def process_json(conf):
                                     DEFAULTS += '    "' + \
                                                 metric[metric.find('.')+1:] +\
                                                 '",\n'
-    DEFAULTS += "}\n"
+    DEFAULTS += '    # ADD ADDITIONAL METRIC NAMES\n'
+    DEFAULTS += '    # TO INCLUDE BY DEFAULT\n'
+    DEFAULTS += '}\n'
     return DEFAULTS
 
 

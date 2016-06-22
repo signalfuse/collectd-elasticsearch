@@ -53,7 +53,7 @@ CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
 DETAILED_METRICS = True
 THREAD_POOLS = []
-CONFIGURED_THREAD_POOLS = set(['search', 'index'])
+CONFIGURED_THREAD_POOLS = set()
 
 
 DEFAULTS = {
@@ -293,6 +293,9 @@ DEFAULTS = {
 
     # CHART: Document Growth %
     "indices.total.docs.count",
+
+    # ADD ADDITIONAL METRIC NAMES
+    # TO INCLUDE BY DEFAULT
 }
 
 # DICT: ElasticSearch 1.0.0
@@ -830,9 +833,12 @@ def configure_callback(conf):
             INDEX_INTERVAL = int(node.values[0])
         elif node.key == "DetailedMetrics":
             DETAILED_METRICS = _bool(node.values[0])
-        elif node.key == "AdditionalThreadPools":
+        elif node.key == "ThreadPools":
             for i in node.values:
                 CONFIGURED_THREAD_POOLS.add(i)
+            # Include required thread pools (search and index)
+            CONFIGURED_THREAD_POOLS.add('search')
+            CONFIGURED_THREAD_POOLS.add('index')
             log_verbose('CONFIGURED_THREAD_POOLS: %s' %
                         CONFIGURED_THREAD_POOLS)
         else:
@@ -858,7 +864,7 @@ def init_stats():
         ES_VERSION, VERBOSE_LOGGING, NODE_STATS_CUR, INDEX_STATS_CUR, \
         CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT, \
-        DEPRECATED_NODE_STATS, THREAD_POOLS
+        DEPRECATED_NODE_STATS, THREAD_POOLS, CONFIGURED_THREAD_POOLS
 
     # Sanitize the COLLECTION_INTERVAL and INDEX_INTERVAL
     # ? INDEX_INTERVAL > COLLECTION_INTERVAL:
@@ -938,9 +944,13 @@ Index Interval has been rounded to: %s" % INDEX_INTERVAL)
     else:
         thread_pools.extend(['merge', 'optimize'])
 
-    # Filter out the thread pools that aren't specified by user
-    THREAD_POOLS = filter(lambda pool: pool in CONFIGURED_THREAD_POOLS,
-                          thread_pools)
+    # Legacy support for old configurations without Thread Pools configuration
+    if len(CONFIGURED_THREAD_POOLS) <= 0:
+        THREAD_POOLS = CONFIGURED_THREAD_POOLS
+    else:
+        # Filter out the thread pools that aren't specified by user
+        THREAD_POOLS = filter(lambda pool: pool in CONFIGURED_THREAD_POOLS,
+                              thread_pools)
 
     ES_CLUSTER_URL = "http://" + ES_HOST + \
                      ":" + str(ES_PORT) + "/_cluster/health"
