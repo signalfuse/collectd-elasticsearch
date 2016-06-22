@@ -804,7 +804,7 @@ def configure_callback(conf):
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, VERBOSE_LOGGING, \
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
-        CONFIGURED_THREAD_POOLS
+        CONFIGURED_THREAD_POOLS, DEFAULTS
 
     for node in conf.children:
         if node.key == 'Host':
@@ -841,6 +841,10 @@ def configure_callback(conf):
             CONFIGURED_THREAD_POOLS.add('index')
             log_verbose('CONFIGURED_THREAD_POOLS: %s' %
                         CONFIGURED_THREAD_POOLS)
+        elif node.key == "AdditionalDefaultMetrics":
+            for i in node.values:
+                DEFAULTS.add(i)
+                log_verbose('Adding %s to the list of default metrics' % i)
         else:
             collectd.warning('elasticsearch plugin: Unknown config key: %s.'
                              % node.key)
