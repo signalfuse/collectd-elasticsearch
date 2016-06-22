@@ -839,8 +839,6 @@ def configure_callback(conf):
             # Include required thread pools (search and index)
             CONFIGURED_THREAD_POOLS.add('search')
             CONFIGURED_THREAD_POOLS.add('index')
-            log_verbose('CONFIGURED_THREAD_POOLS: %s' %
-                        CONFIGURED_THREAD_POOLS)
         elif node.key == "AdditionalDefaultMetrics":
             for i in node.values:
                 DEFAULTS.add(i)
@@ -848,6 +846,18 @@ def configure_callback(conf):
         else:
             collectd.warning('elasticsearch plugin: Unknown config key: %s.'
                              % node.key)
+
+    log_verbose("HOST: %s" % ES_HOST)
+    log_verbose("PORT: %s" % ES_PORT)
+    log_verbose("ES_INDEX: %s" % ES_INDEX)
+    log_verbose("ENABLE_INDEX_STATS: %s" % ENABLE_INDEX_STATS)
+    log_verbose("ENABLE_CLUSTER_STATS: %s" % ENABLE_CLUSTER_STATS)
+    log_verbose("COLLECTION_INTERVAL: %s" % COLLECTION_INTERVAL)
+    log_verbose('INDEX_INTERVAL: %s' % INDEX_INTERVAL)
+    log_verbose('DETAILED_METRICS: %s' % DETAILED_METRICS)
+    log_verbose('CONFIGURED_THREAD_POOLS: %s' % CONFIGURED_THREAD_POOLS)
+
+
 
     # determine node information
     load_es_info()
