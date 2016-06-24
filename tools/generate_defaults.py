@@ -8,8 +8,8 @@ def load_file(file):
     :return: An array of loaded json objects
     """
     CONFIGS = []
-    f = open(file, 'r')
-    j = json.load(f)
+    with open(file, 'r') as f:
+        j = json.load(f)
     f.close()
     CONFIGS.append(j)
     return CONFIGS
@@ -27,10 +27,10 @@ def process_json(conf):
         for a in file:
             # ? a.sf_page
             if 'sf_page' in a.keys():
-                DEFAULTS += '\n    # PAGE: ' + a['sf_page'] + '\n'
+                DEFAULTS += '\n    # PAGE: ' + a['sf_page']
             # ? a.sf_dashboard
             if 'sf_dashboard' in a.keys():
-                DEFAULTS += '\n    # DASHBOARD: ' + a['sf_dashboard'] + '\n'
+                DEFAULTS += '\n    # DASHBOARD: ' + a['sf_dashboard']
             # ? a.sf_chart
             if 'sf_chart' in a.keys():
                 DEFAULTS += '\n    # CHART: ' + a['sf_chart'] + '\n'
