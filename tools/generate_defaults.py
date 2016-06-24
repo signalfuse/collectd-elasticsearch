@@ -15,25 +15,19 @@ def load_file(file):
     return CONFIGS
 
 
-def process_json(conf):
+def process_json_minimal(conf):
     """ Processes an array of SignalFx Default Dashboard json objects
     :param conf: An array of json loaded objects
     :return: A string representation of a python dictionary named "DEFAULTS"
     """
-    DEFAULTS = "DEFAULTS = {"
+    d = set()
+    DEFAULTS = "DEFAULTS = {\n"
     # Iterate over each file passed in
     for file in conf:
         # Iterate each element in the first level array
         for a in file:
-            # ? a.sf_page
-            if 'sf_page' in a.keys():
-                DEFAULTS += '\n    # PAGE: ' + a['sf_page']
-            # ? a.sf_dashboard
-            if 'sf_dashboard' in a.keys():
-                DEFAULTS += '\n    # DASHBOARD: ' + a['sf_dashboard']
             # ? a.sf_chart
             if 'sf_chart' in a.keys():
-                DEFAULTS += '\n    # CHART: ' + a['sf_chart'] + '\n'
                 # ? a.sf_uiModel
                 if 'sf_uiModel' in a.keys():
                     # ? a.sf_uiModel.allPlots
@@ -45,10 +39,9 @@ def process_json(conf):
                                 # ? a.sf_uiModel.allPlots[i].seriesData.metric
                                 if 'metric' in b['seriesData'].keys():
                                     # temporarily store the metric name
-                                    metric = b['seriesData']['metric']
-                                    DEFAULTS += '    "' + \
-                                                metric[metric.find('.')+1:] +\
-                                                '",\n'
+                                    d.add(b['seriesData']['metric'])
+    for elem in d:
+        DEFAULTS += '    "' + elem + '",\n'
     DEFAULTS += '    # ADD ADDITIONAL METRIC NAMES\n'
     DEFAULTS += '    # TO INCLUDE BY DEFAULT\n'
     DEFAULTS += '}\n'
@@ -79,7 +72,7 @@ def run(files):
                    (file, e)
     if len(config) > 0:
         # Process the array of loaded json
-        defaults = process_json(config)
+        defaults = process_json_minimal(config)
         # Save the file to the working directory
         save_file(defaults, "DEFAULTS_DICT.py")
         # Load the generated defaults from the python file that was written out

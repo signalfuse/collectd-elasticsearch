@@ -55,239 +55,52 @@ DETAILED_METRICS = True
 THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set()
 
-# Generated with Elasticsearch and ElasticsearchIndex default
-# dashboards using the generate_defaults.py script
 DEFAULTS = {
-    # PAGE: Elasticsearch
-    # DASHBOARD: Elasticsearch Node
-    # CHART: Requests/sec
-    "indices.search.query-total",
-    "indices.indexing.index-total",
-    "indices.get.total",
-
-    # CHART: Document Growth Rate %
-    "indices.docs.count",
-    "indices.docs.count",
-    "indices.docs.count",
-    "indices.docs.count",
-
-    # CHART: Indexing Requests/sec
-    "indices.indexing.index-total",
-
-    # CHART: Average Query Latency (ms)
-    "indices.search.query-total",
-    "indices.search.query-time",
-
-    # CHART: File Descriptors and Segments
-    "process.open_file_descriptors",
-    "indices.segments.count",
-
-    # CHART: Memory Heap Size (bytes)
-    "jvm.mem.heap-used",
-    "jvm.mem.heap-committed",
-
-    # CHART: Active Merges
-    "indices.merges.current",
-
-    # CHART: Search Requests/sec
-    "indices.search.query-total",
-
-    # CHART: Merges/sec
-    "indices.merges.total",
-
-    # CHART: Thread Pool Rejections
-    "thread_pool.bulk.rejected",
-    "thread_pool.flush.rejected",
-    "thread_pool.generic.rejected",
-    "thread_pool.get.rejected",
-    "thread_pool.index.rejected",
-    "thread_pool.merge.rejected",
-    "thread_pool.optimize.rejected",
-    "thread_pool.refresh.rejected",
-    "thread_pool.search.rejected",
-    "thread_pool.snapshot.rejected",
-
-    # CHART: Cache Sizes (bytes)
-    "indices.cache.filter.size",
-    "indices.cache.field.size",
-
-    # CHART: GC Time %
-    "jvm.gc.time",
-    "jvm.uptime",
-
-    # DASHBOARD: Elasticsearch
-    # CHART: Top Clusters by Query Latency (ms)
-    "indices.search.query-total",
-    "indices.search.query-time",
-    "indices.search.query-total",
-    "indices.search.query-time",
-
-    # CHART: Top Clusters by Indexing Requests
-    "indices.indexing.index-total",
-
-    # CHART: Merges/sec
-    "indices.merges.total",
-
-    # CHART: # Hosts/Clusters
-    "indices.indexing.index-total",
-    "indices.indexing.index-total",
-
-    # CHART: Thread Pool Rejections
-    "thread_pool.bulk.rejected",
-    "thread_pool.flush.rejected",
-    "thread_pool.generic.rejected",
-    "thread_pool.get.rejected",
-    "thread_pool.index.rejected",
-    "thread_pool.merge.rejected",
-    "thread_pool.optimize.rejected",
-    "thread_pool.refresh.rejected",
-    "thread_pool.search.rejected",
-    "thread_pool.snapshot.rejected",
-
-    # CHART: Search Requests
-    "indices.search.query-total",
-
-    # CHART: GC Time %
-    "jvm.gc.time",
-    "jvm.uptime",
-    "jvm.gc.time",
-    "jvm.uptime",
-
-    # CHART: Deleted Documents %
-    "indices.docs.deleted",
-    "indices.docs.count",
-
-    # CHART: Document Growth %
-    "indices.docs.count",
-    "indices.docs.count",
-
-    # CHART: Cache Size (bytes)
-    "indices.cache.filter.size",
-    "indices.cache.field.size",
-
-    # CHART: Top Clusters by Index Growth %
-    "indices.store.size",
-    "indices.store.size",
-
-    # CHART: Top Clusters by Search Requests
-    "indices.search.query-total",
-
-    # CHART: Indexing Requests
-    "indices.indexing.index-total",
-
-    # CHART: Heap %
-    "jvm.mem.heap-used",
-    "jvm.mem.heap-committed",
-
-    # DASHBOARD: Elasticsearch Cluster
-    # CHART: Thread Pool Rejections
-    "thread_pool.bulk.rejected",
-    "thread_pool.flush.rejected",
-    "thread_pool.generic.rejected",
-    "thread_pool.get.rejected",
-    "thread_pool.index.rejected",
-    "thread_pool.merge.rejected",
-    "thread_pool.optimize.rejected",
-    "thread_pool.refresh.rejected",
-    "thread_pool.search.rejected",
-    "thread_pool.snapshot.rejected",
-
-    # CHART: Deleted Documents %
-    "indices.total.docs.deleted",
-    "indices.total.docs.count",
-
-    # CHART: GC Time %
-    "jvm.gc.time",
-    "jvm.uptime",
-    "jvm.gc.time",
-    "jvm.uptime",
-
-    # CHART: # Nodes
-    "cluster.number-of-nodes",
-    "cluster.number-of-data_nodes",
-
-    # CHART: Cache Size (bytes)
-    "indices.total.filter-cache.memory-size",
-    "indices.total.fielddata.memory-size",
-
-    # CHART: Heap %
-    "jvm.mem.heap-used",
-    "jvm.mem.heap-committed",
-
-    # CHART: Cluster Shard Allocation
-    "cluster.unassigned-shards",
-    "cluster.relocating-shards",
-    "cluster.active-primary-shards",
-    "cluster.active-shards",
-
-    # PAGE: Elasticsearch Index
-    # DASHBOARD: Elasticsearch Indexes
-    # CHART: Top Indexes by Indexing Requests
-    "indices.total.indexing.index-total",
-
-    # CHART: Merges/sec
-    "indices.total.merges.total",
-
-    # CHART: Top Indexes by Search Requests
-    "indices.total.search.query-total",
-
-    # CHART: Search Requests/sec
-    "indices.total.search.query-total",
-
-    # CHART: Indexing Requests/sec
-    "indices.total.indexing.index-total",
-
-    # CHART: Top Indexes by Index Size Growth %
-    "indices.total.store.size",
-    "indices.total.store.size",
-
-    # CHART: Top Indexes by Query Latency (ms)
-    "indices.total.search.query-total",
-    "indices.total.search.query-time",
-
-    # CHART: Document Growth %
-    "indices.total.docs.count",
-
-    # DASHBOARD: Elasticsearch Index
-    # CHART: Deleted Documents %
-    "indices.total.docs.deleted",
-    "indices.total.docs.count",
-
-    # CHART: Cache Size (bytes)
-    "indices.total.filter-cache.memory-size",
-    "indices.total.fielddata.memory-size",
-
-    # CHART: Merge Latency (ms)
-    "indices.total.merges.total",
-    "indices.total.merges.total-time",
-
-    # CHART: Search Requests/sec
-    "indices.total.search.query-total",
-
-    # CHART: Elasticsearch Tips
-
-    # CHART: Index Statistics
-    "indices.total.store.size",
-    "indices.total.store.size",
-    "indices.total.docs.count",
-
-    # CHART: Search Latency (ms)
-    "indices.total.search.query-total",
-    "indices.total.search.query-time",
-
-    # CHART: Index Latency (ms)
-    "indices.total.indexing.index-total",
-    "indices.total.indexing.index-time",
-
-    # CHART: Merges/sec
-    "indices.total.merges.total",
-
-    # CHART: Indexing Requests/sec
-    "indices.total.indexing.index-total",
-
-    # CHART: Document Growth %
-    "indices.total.docs.count",
-
+    "gauge.indices.merges.current",
+    "gauge.indices.total.docs.count",
+    "counter.thread_pool.optimize.rejected",
+    "gauge.indices.total.fielddata.memory-size",
+    "gauge.indices.total.filter-cache.memory-size",
+    "gauge.indices.total.store.size",
+    "counter.jvm.gc.time",
+    "counter.indices.total.merges.total",
+    "gauge.indices.store.size",
+    "gauge.cluster.unassigned-shards",
+    "gauge.cluster.relocating-shards",
+    "counter.jvm.uptime",
+    "gauge.indices.total.docs.deleted",
+    "counter.thread_pool.index.rejected",
+    "gauge.indices.segments.count",
+    "counter.thread_pool.merge.rejected",
+    "counter.indices.search.query-time",
+    "gauge.cluster.active-shards",
+    "counter.indices.merges.total",
+    "gauge.cluster.active-primary-shards",
+    "counter.indices.total.search.query-total",
+    "counter.thread_pool.flush.rejected",
+    "counter.thread_pool.snapshot.rejected",
+    "gauge.cluster.number-of-nodes",
+    "gauge.process.open_file_descriptors",
+    "gauge.indices.cache.filter.size",
+    "counter.thread_pool.generic.rejected",
+    "gauge.jvm.mem.heap-used",
+    "gauge.jvm.mem.heap-committed",
+    "counter.thread_pool.refresh.rejected",
+    "gauge.indices.cache.field.size",
+    "counter.thread_pool.search.rejected",
+    "counter.indices.total.merges.total-time",
+    "gauge.indices.docs.count",
+    "counter.indices.search.query-total",
+    "counter.indices.total.indexing.index-time",
+    "counter.indices.indexing.index-total",
+    "counter.thread_pool.bulk.rejected",
+    "counter.indices.get.total",
+    "gauge.indices.docs.deleted",
+    "gauge.cluster.number-of-data_nodes",
+    "counter.thread_pool.get.rejected",
+    "counter.indices.total.indexing.index-total",
+    "counter.indices.total.search.query-time",
+    "counter.thread_pool.rejected",
     # ADD ADDITIONAL METRIC NAMES
     # TO INCLUDE BY DEFAULT
 }
