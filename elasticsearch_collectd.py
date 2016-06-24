@@ -55,7 +55,8 @@ DETAILED_METRICS = True
 THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set()
 
-
+# Generated with Elasticsearch and ElasticsearchIndex default
+# dashboards using the generate_defaults.py script
 DEFAULTS = {
     # PAGE: Elasticsearch
 
@@ -856,8 +857,6 @@ def configure_callback(conf):
     log_verbose('INDEX_INTERVAL: %s' % INDEX_INTERVAL)
     log_verbose('DETAILED_METRICS: %s' % DETAILED_METRICS)
     log_verbose('CONFIGURED_THREAD_POOLS: %s' % CONFIGURED_THREAD_POOLS)
-
-
 
     # determine node information
     load_es_info()
