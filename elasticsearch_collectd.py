@@ -17,11 +17,14 @@
 import collections
 import json
 import urllib2
+import base64
 
 PREFIX = "elasticsearch"
 ES_HOST = "localhost"
 ES_PORT = 9200
 ES_CLUSTER = None
+ES_USERNAME = ""
+ES_PASSWORD = ""
 ES_VERSION = None
 ES_MASTER_ELIGIBLE = None
 
@@ -610,13 +613,17 @@ def configure_callback(conf):
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, VERBOSE_LOGGING, \
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
-        CONFIGURED_THREAD_POOLS, DEFAULTS
+        CONFIGURED_THREAD_POOLS, DEFAULTS, ES_USERNAME, ES_PASSWORD
 
     for node in conf.children:
         if node.key == 'Host':
             ES_HOST = node.values[0]
         elif node.key == 'Port':
             ES_PORT = int(node.values[0])
+        elif node.key == 'Username':
+            ES_USERNAME = node.values[0]
+        elif node.key == 'Password':
+            ES_PASSWORD = node.values[0]
         elif node.key == 'Verbose':
             VERBOSE_LOGGING = str_to_bool(node.values[0])
         elif node.key == 'Cluster':
@@ -843,11 +850,18 @@ def fetch_stats():
 def fetch_url(url):
     response = None
     try:
-        response = urllib2.urlopen(url, timeout=10)
+        request = urllib2.Request(url)
+        if ES_USERNAME:
+            authheader = base64.encodestring('%s:%s' %
+                                             (ES_USERNAME, ES_PASSWORD)
+                                             ).replace('\n', '')
+            request.add_header("Authorization", "Basic %s" % authheader)
+        response = urllib2.urlopen(request, timeout=10)
         return json.load(response)
-    except urllib2.URLError, e:
+    except (urllib2.URLError, urllib2.HTTPError), e:
         collectd.error(
-            'elasticsearch plugin: Error connecting to %s - %r' % (url, e))
+            'elasticsearch plugin: Error connecting to %s - %r : %s' %
+            (url, e, e))
         return None
     finally:
         if response is not None:
