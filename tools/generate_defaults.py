@@ -39,7 +39,8 @@ def process_json_minimal(conf):
                                 # ? a.sf_uiModel.allPlots[i].seriesData.metric
                                 if 'metric' in b['seriesData'].keys():
                                     # temporarily store the metric name
-                                    d.add(b['seriesData']['metric'])
+                                    metric = b['seriesData']['metric']
+                                    d.add(metric[metric.find('.')+1:])
     for elem in d:
         DEFAULTS += '    "' + elem + '",\n'
     DEFAULTS += '    # ADD ADDITIONAL METRIC NAMES\n'

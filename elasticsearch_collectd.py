@@ -56,51 +56,50 @@ THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set()
 
 DEFAULTS = {
-    "gauge.indices.merges.current",
-    "gauge.indices.total.docs.count",
-    "counter.thread_pool.optimize.rejected",
-    "gauge.indices.total.fielddata.memory-size",
-    "gauge.indices.total.filter-cache.memory-size",
-    "gauge.indices.total.store.size",
-    "counter.jvm.gc.time",
-    "counter.indices.total.merges.total",
-    "gauge.indices.store.size",
-    "gauge.cluster.unassigned-shards",
-    "gauge.cluster.relocating-shards",
-    "counter.jvm.uptime",
-    "gauge.indices.total.docs.deleted",
-    "counter.thread_pool.index.rejected",
-    "gauge.indices.segments.count",
-    "counter.thread_pool.merge.rejected",
-    "counter.indices.search.query-time",
-    "gauge.cluster.active-shards",
-    "counter.indices.merges.total",
-    "gauge.cluster.active-primary-shards",
-    "counter.indices.total.search.query-total",
-    "counter.thread_pool.flush.rejected",
-    "counter.thread_pool.snapshot.rejected",
-    "gauge.cluster.number-of-nodes",
-    "gauge.process.open_file_descriptors",
-    "gauge.indices.cache.filter.size",
-    "counter.thread_pool.generic.rejected",
-    "gauge.jvm.mem.heap-used",
-    "gauge.jvm.mem.heap-committed",
-    "counter.thread_pool.refresh.rejected",
-    "gauge.indices.cache.field.size",
-    "counter.thread_pool.search.rejected",
-    "counter.indices.total.merges.total-time",
-    "gauge.indices.docs.count",
-    "counter.indices.search.query-total",
-    "counter.indices.total.indexing.index-time",
-    "counter.indices.indexing.index-total",
-    "counter.thread_pool.bulk.rejected",
-    "counter.indices.get.total",
-    "gauge.indices.docs.deleted",
-    "gauge.cluster.number-of-data_nodes",
-    "counter.thread_pool.get.rejected",
-    "counter.indices.total.indexing.index-total",
-    "counter.indices.total.search.query-time",
-    "counter.thread_pool.rejected",
+    "indices.total.docs.deleted",
+    "indices.total.fielddata.memory-size",
+    "indices.merges.total",
+    "cluster.number-of-nodes",
+    "process.open_file_descriptors",
+    "indices.total.merges.total",
+    "indices.total.store.size",
+    "thread_pool.generic.rejected",
+    "indices.segments.count",
+    "indices.merges.current",
+    "jvm.mem.heap-used",
+    "indices.search.query-time",
+    "cluster.number-of-data_nodes",
+    "cluster.active-shards",
+    "indices.indexing.index-total",
+    "indices.get.total",
+    "cluster.unassigned-shards",
+    "thread_pool.merge.rejected",
+    "indices.cache.field.size",
+    "thread_pool.search.rejected",
+    "jvm.gc.time",
+    "indices.store.size",
+    "thread_pool.get.rejected",
+    "indices.total.search.query-time",
+    "indices.search.query-total",
+    "indices.total.merges.total-time",
+    "cluster.active-primary-shards",
+    "indices.docs.deleted",
+    "thread_pool.refresh.rejected",
+    "indices.cache.filter.size",
+    "indices.total.search.query-total",
+    "thread_pool.flush.rejected",
+    "indices.docs.count",
+    "indices.total.indexing.index-time",
+    "indices.total.indexing.index-total",
+    "jvm.mem.heap-committed",
+    "indices.total.docs.count",
+    "cluster.relocating-shards",
+    "thread_pool.index.rejected",
+    "thread_pool.optimize.rejected",
+    "thread_pool.snapshot.rejected",
+    "jvm.uptime",
+    "indices.total.filter-cache.memory-size",
+    "thread_pool.bulk.rejected",
     # ADD ADDITIONAL METRIC NAMES
     # TO INCLUDE BY DEFAULT
 }
@@ -905,7 +904,7 @@ def parse_thread_pool_stats(json, stats):
     for pool in THREAD_POOLS:
         for metric_type, value in THREAD_POOL_METRICS.iteritems():
             for attr in value:
-                name = 'thread_pool.{0}'.format(attr)
+                name = 'thread_pool.{0}.{1}'.format(pool, attr)
                 key = Stat(metric_type, 'nodes.%s.thread_pool.{0}.{1}'.
                            format(pool, attr))
                 if DETAILED_METRICS is True or name in DEFAULTS:
@@ -918,7 +917,7 @@ def parse_thread_pool_stats(json, stats):
                     else:
                         result = None
 
-                    dispatch_stat(result, name, key, {'thread_pool': pool})
+                    dispatch_stat(result, name, key)
 
 
 def parse_cluster_stats(json, stats):
