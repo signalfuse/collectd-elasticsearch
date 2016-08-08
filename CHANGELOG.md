@@ -2,12 +2,18 @@
 
 This file documents important changes to the Elasticsearch plugin for collectd. 
 
+- [2016-08-08: Restore compatibility with 
+python v2.6](#2016-08-08)
 - [2016-07-21: Dimensionalize thread pool metrics
 by thread pool](#2016-07-21-dimensionalize-thread-pool-metrics-by-thread-pool)
 - [2016-06-28: Basic configuration
 changes](#2016-06-28-changes-to-basic-plugin-configuration) 
 - [2016-06-27: Support for basic 
 authentication](#2016-06-27-support-for-basic-authentication)
+
+#### <a id="2016-08-08"></a> 2016-08-08: Restore compatibility with python v2.6 
+
+This latest revision restores compatibility with Python v2.6.
 
 #### 2016-07-21: Dimensionalize thread pool metrics by thread pool
 

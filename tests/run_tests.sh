@@ -1,12 +1,21 @@
 #!/bin/bash
+PYTHON="python"
+if [ ! -z "$1" ]; then
+  PYTHON="$1"
+fi
+
+PYTHON_VERSION=$(${PYTHON} -V 2>&1)
+
+echo "Interpreter version: ${PYTHON_VERSION}"
+
 tmpfile=$(mktemp /tmp/run_tests.sh.XXXXXX)
 trap 'rm -f $tmpfile' 1 2 3 15
 for scenario in `ls data`; do
   echo -n "testing against ES $scenario"
 
-  ./simulate.py data/${scenario} &> /dev/null &
+  ${PYTHON} ./simulate.py data/${scenario} &> /dev/null &
   pid="$!"
-  ../elasticsearch_collectd.py > $tmpfile
+  ${PYTHON} ../elasticsearch_collectd.py > $tmpfile
   if [ $? != 0 ]; then
     echo " [FAILED] returned non 0 exit code"
   else
