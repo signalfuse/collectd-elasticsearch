@@ -57,7 +57,7 @@ DETAILED_METRICS = True
 THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set()
 
-DEFAULTS = {
+DEFAULTS = set([
     # AUTOMATICALLY GENERATED METRIC NAMES
     # TO INCLUDE BY DEFAULT
     "indices.total.docs.deleted",
@@ -95,17 +95,17 @@ DEFAULTS = {
     "cluster.relocating-shards",
     "thread_pool.rejected",
     "jvm.uptime",
-    "indices.total.filter-cache.memory-size",
-}
+    "indices.total.filter-cache.memory-size"
+])
 
-DEFAULTS.update({
+DEFAULTS.update([
     # ADD ADDITIONAL METRIC NAMES
     # TO INCLUDE BY DEFAULT
     "cluster.status",
     "indicies.indexing.index-time",
     "indices.merges.time"
     "indicies.store.throttle-time",
-})
+])
 
 # DICT: ElasticSearch 1.0.0
 NODE_STATS = {
@@ -1017,19 +1017,19 @@ class CollectdMock(object):
         self.value_mock = CollectdValuesMock
 
     def debug(self, msg):
-        print 'DEBUG: {}'.format(msg)
+        print 'DEBUG: {0}'.format(msg)
 
     def info(self, msg):
-        print 'INFO: {}'.format(msg)
+        print 'INFO: {0}'.format(msg)
 
     def notice(self, msg):
-        print 'NOTICE: {}'.format(msg)
+        print 'NOTICE: {0}'.format(msg)
 
     def warning(self, msg):
-        print 'WARN: {}'.format(msg)
+        print 'WARN: {0}'.format(msg)
 
     def error(self, msg):
-        print 'ERROR: {}'.format(msg)
+        print 'ERROR: {0}'.format(msg)
         sys.exit(1)
 
     def Values(self, plugin='elasticsearch'):
@@ -1044,8 +1044,8 @@ class CollectdValuesMock(object):
         attrs = []
         for name in dir(self):
             if not name.startswith('_') and name is not 'dispatch':
-                attrs.append("{}={}".format(name, getattr(self, name)))
-        return "<CollectdValues {}>".format(' '.join(attrs))
+                attrs.append("{0}={1}".format(name, getattr(self, name)))
+        return "<CollectdValues {0}>".format(' '.join(attrs))
 
 
 class CollectdLogHandler(logging.Handler):
@@ -1061,14 +1061,14 @@ class CollectdLogHandler(logging.Handler):
         plugin -- name of the plugin (default 'unknown')
         verbose -- enable/disable verbose messages (default False)
     """
-    def __init__(self, plugin="unknown", verbose=False):
+    def __init__(self, plugin=None, verbose=False):
         """Initializes CollectdLogHandler
         Arguments
             plugin -- string name of the plugin (default 'unknown')
             verbose -- enable/disable verbose messages (default False)
         """
         self.verbose = verbose
-        self.plugin = plugin
+        self.plugin = plugin if plugin is not None else "elasticsearch"
         logging.Handler.__init__(self, level=logging.NOTSET)
 
     def emit(self, record):
