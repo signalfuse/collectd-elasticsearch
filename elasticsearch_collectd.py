@@ -30,6 +30,7 @@ ES_VERSION = None
 ES_MASTER_ELIGIBLE = None
 
 ENABLE_INDEX_STATS = True
+ENABLE_SHARD_STATS = False
 ENABLE_CLUSTER_STATS = True
 
 ES_NODE_URL = ""
@@ -563,6 +564,15 @@ INDEX_STATS = {
 
 }
 
+# Shard Metrics
+INDEX_SHARD_STATS = {
+    "indices[index={shard_index_name}].shard.{shard_id}.docs":
+        Stat("gauge", "docs.count"),
+    "indices[index={shard_index_name}].shard.{shard_id}.size_in_bytes":
+        Stat("bytes", "store.size_in_bytes"),
+}
+
+
 # ElasticSearch cluster stats (1.0.0 and later)
 CLUSTER_STATS = {
     'cluster.active-primary-shards': Stat("gauge", "active_primary_shards"),
@@ -611,9 +621,10 @@ def str_to_bool(value):
 def configure_callback(conf):
     """called by collectd to configure the plugin. This is called only once"""
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_VERSION, \
-        ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
-        DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
-        CONFIGURED_THREAD_POOLS, DEFAULTS, ES_USERNAME, ES_PASSWORD
+        ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_SHARD_STATS, \
+        ENABLE_CLUSTER_STATS, DETAILED_METRICS, COLLECTION_INTERVAL, \
+        INDEX_INTERVAL, CONFIGURED_THREAD_POOLS, DEFAULTS, ES_USERNAME, \
+        ES_PASSWORD
 
     for node in conf.children:
         if node.key == 'Host':
@@ -638,6 +649,8 @@ def configure_callback(conf):
             ES_INDEX = node.values
         elif node.key == 'EnableIndexStats':
             ENABLE_INDEX_STATS = str_to_bool(node.values[0])
+        elif node.key == 'EnableShardStats':
+            ENABLE_SHARD_STATS = str_to_bool(node.values[0])
         elif node.key == 'EnableClusterHealth':
             ENABLE_CLUSTER_STATS = str_to_bool(node.values[0])
         elif node.key == 'Interval':
@@ -662,6 +675,7 @@ def configure_callback(conf):
     log.info('PORT: %s' % ES_PORT)
     log.info('ES_INDEX: %s' % ES_INDEX)
     log.info('ENABLE_INDEX_STATS: %s' % ENABLE_INDEX_STATS)
+    log.info('ENABLE_SHARD_STATS: %s' % ENABLE_SHARD_STATS)
     log.info('ENABLE_CLUSTER_STATS: %s' % ENABLE_CLUSTER_STATS)
     log.info('COLLECTION_INTERVAL: %s' % COLLECTION_INTERVAL)
     log.info('INDEX_INTERVAL: %s' % INDEX_INTERVAL)
@@ -739,9 +753,10 @@ def remove_deprecated_node_stats():
 def init_stats():
     global ES_HOST, ES_PORT, ES_NODE_URL, ES_CLUSTER_URL, ES_INDEX_URL, \
         ES_VERSION, NODE_STATS_CUR, INDEX_STATS_CUR, \
-        CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
-        INDEX_INTERVAL, INDEX_SKIP, COLLECTION_INTERVAL, SKIP_COUNT, \
-        DEPRECATED_NODE_STATS, THREAD_POOLS, CONFIGURED_THREAD_POOLS
+        CLUSTER_STATS_CUR, ENABLE_INDEX_STATS, ENABLE_SHARD_STATS, \
+        ENABLE_CLUSTER_STATS, INDEX_INTERVAL, INDEX_SKIP, \
+        COLLECTION_INTERVAL, SKIP_COUNT, DEPRECATED_NODE_STATS, THREAD_POOLS, \
+        CONFIGURED_THREAD_POOLS
 
     sanatize_intervals()
 
@@ -770,6 +785,9 @@ def init_stats():
     else:
         ES_INDEX_URL = "http://" + ES_HOST + ":" + \
                        str(ES_PORT) + "/" + ",".join(ES_INDEX) + "/_stats"
+
+    if ENABLE_SHARD_STATS:
+        ES_INDEX_URL = ES_INDEX_URL + "?level=shards"
 
     # common thread pools for all ES versions
     thread_pools = ['generic', 'index', 'get', 'snapshot', 'bulk', 'warmer',
@@ -843,9 +861,16 @@ def fetch_stats():
         if indices:
             indexes_json_stats = indices['indices']
             for index_name in indexes_json_stats.keys():
+                index_data = indexes_json_stats[index_name]
                 log.info('Parsing index stats for index: %s' % index_name)
-                parse_index_stats(indexes_json_stats[index_name], index_name)
-    # Incrememnt skip count
+                parse_index_stats(index_data, index_name)
+                if ENABLE_SHARD_STATS:
+                    shard_json_stats = index_data['shards']
+                    for shard_id in shard_json_stats.keys():
+                        log.info('Parsing shard stats for %s[%s]' % (index_name, shard_id))
+                        parse_shard_stats(shard_json_stats[shard_id],
+                                          index_name, shard_id)
+    # Increment skip count
     SKIP_COUNT += 1
 
 
@@ -959,6 +984,14 @@ def parse_index_stats(json, index_name):
             # the index as a dimensions
             name = name.format(index_name=sanitize_type_instance(index_name))
             dispatch_stat(result, name, key)
+
+
+def parse_shard_stats(json, shard_index_name, shard_id):
+    """Parse shard stats from index stats from ElasticSearch"""
+    for name, key in INDEX_SHARD_STATS.iteritems():
+        result = dig_it_up(json[0], key.path)
+        name = name.format(shard_id=shard_id, shard_index_name=shard_index_name)
+        dispatch_stat(result, name, key)
 
 
 def sanitize_type_instance(index_name):
@@ -1143,7 +1176,8 @@ log.addHandler(handle)
 def configure_test():
     """Configure the plugin for testing"""
     global CONFIGURED_THREAD_POOLS, DETAILED_METRICS, INDEX_INTERVAL, \
-        ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, ES_MASTER_ELIGIBLE
+        ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, ES_MASTER_ELIGIBLE, \
+        ENABLE_SHARD_STATS
 
     # Ensure all possible threadpools are elligible for collection
     CONFIGURED_THREAD_POOLS = set(['generic', 'index', 'get', 'snapshot',
@@ -1157,6 +1191,7 @@ def configure_test():
     ENABLE_INDEX_STATS = True
     ENABLE_CLUSTER_STATS = True
     ES_MASTER_ELIGIBLE = True
+    ENABLE_SHARD_STATS = False
 
 
 if __name__ == '__main__':
