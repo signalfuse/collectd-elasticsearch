@@ -22,7 +22,7 @@ docker run --name "$CONTAINER_NAME" -d -p 0.0.0.0:${PORT}:9200 elasticsearch:${V
 
 # create base directories
 mkdir -p $DIR/_all/_stats
-mkdir -p $DIR/_cluster
+mkdir -p $DIR/_cluster/state
 mkdir -p $DIR/_nodes/_local/stats
 
 # sleep for a couple of seconds to ensure ES is up
@@ -38,6 +38,7 @@ curl -s "http://${ES_HOST}/_all/_stats" > $DIR/_all/_stats/index.json
 curl -s "http://${ES_HOST}/_cluster/health" > $DIR/_cluster/health.json
 curl -s "http://${ES_HOST}/_nodes/_local" > $DIR/_nodes/_local/index.json
 curl -s "http://${ES_HOST}/_nodes/_local/stats/transport,http,process,jvm,indices,thread_pool" > $DIR/_nodes/_local/stats/transport,http,process,jvm,indices,thread_pool.json
+curl -s "http://${ES_HOST}/_cluster/state/master_node" > $DIR/_cluster/state/master_node.json
 curl -s "http://${ES_HOST}" > $DIR/index.json
 
 docker stop $CONTAINER_NAME

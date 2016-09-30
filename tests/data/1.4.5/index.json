@@ -1,6 +1,6 @@
 {
   "status" : 200,
-  "name" : "Elaine Grey",
+  "name" : "Red Ghost",
   "cluster_name" : "elasticsearch",
   "version" : {
     "number" : "1.4.5",

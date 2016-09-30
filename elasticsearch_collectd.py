@@ -59,6 +59,7 @@ CONFIGURED_THREAD_POOLS = set()
 
 ES_CURRENT_MASTER = False
 MASTER_ONLY = False
+NODE_ID = None
 
 DEFAULTS = set([
     # AUTOMATICALLY GENERATED METRIC NAMES
@@ -846,7 +847,10 @@ def fetch_stats():
         log.info('Parsing cluster stats')
         parse_cluster_stats(cluster_json_stats, CLUSTER_STATS)
 
-    if (ENABLE_INDEX_STATS and ES_MASTER_ELIGIBLE and SKIP_COUNT >= INDEX_SKIP) and ((MASTER_ONLY and ES_CURRENT_MASTER) or (not MASTER_ONLY )):
+    if (ENABLE_INDEX_STATS and ES_MASTER_ELIGIBLE and
+        SKIP_COUNT >= INDEX_SKIP) \
+        and ((MASTER_ONLY and ES_CURRENT_MASTER)
+             or (not MASTER_ONLY)):
         # Reset skip count
         SKIP_COUNT = 0
         indices = fetch_url(ES_INDEX_URL)
@@ -882,7 +886,7 @@ def fetch_url(url):
 
 
 def load_es_info():
-    global ES_VERSION, ES_CLUSTER, ES_MASTER_ELIGIBLE
+    global ES_VERSION, ES_CLUSTER, ES_MASTER_ELIGIBLE, NODE_ID
 
     json = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT) +
                      "/_nodes/_local")
@@ -897,6 +901,10 @@ def load_es_info():
 information, defaulting to version %s, cluster %s and master %s' %
                     (ES_VERSION, ES_CLUSTER, ES_MASTER_ELIGIBLE))
         return
+
+    # Identify the current node
+    NODE_ID = json['nodes'].keys()[0]
+    log.notice('current node id: %s' % NODE_ID)
 
     cluster_name = json['cluster_name']
     # we should have only one entry with the current node information
@@ -920,23 +928,20 @@ information, defaulting to version %s, cluster %s and master %s' %
 
 
 def detect_es_master():
-    """Determines if this is the current master. This method sets ES_CURRENT_MASTER"""
+    """Determines if this is the current master. This method sets
+    ES_CURRENT_MASTER"""
     global ES_CURRENT_MASTER
-
-    json = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT) +
-                     "/_nodes/_local")
-    if json is None:
-        ES_CURRENT_MASTER = False
-        log.warning('Unable to determine node \
-information, defaulting to current master %s' % ES_CURRENT_MASTER)
-        return
-
-    # determine current master and update globel setting
+    # determine current master
     cluster_state = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT) +
-                            "/_cluster/state/master_node")
-    ES_CURRENT_MASTER = cluster_state['master_node'] == json['nodes'].keys()[0]
-
-    log.notice('current master: %s' % ES_CURRENT_MASTER)
+                              "/_cluster/state/master_node")
+    if ES_CURRENT_MASTER is False and cluster_state['master_node'] == NODE_ID:
+        ES_CURRENT_MASTER = True
+        log.notice('current master: %s' % ES_CURRENT_MASTER)
+    elif ES_CURRENT_MASTER is True and cluster_state['master_node'] != NODE_ID:
+        ES_CURRENT_MASTER = False
+        log.notice('current master: %s' % ES_CURRENT_MASTER)
+    else:
+        log.debug('current master: %s' % ES_CURRENT_MASTER)
 
 
 def parse_node_stats(json, stats):

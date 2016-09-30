@@ -1,5 +1,5 @@
 {
-  "name" : "Loki",
+  "name" : "Scrier",
   "cluster_name" : "elasticsearch",
   "version" : {
     "number" : "2.3.3",
