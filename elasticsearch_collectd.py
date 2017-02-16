@@ -340,6 +340,12 @@ NODE_STATS_ES_2 = {
         Stat("counter", "nodes.%s.indices.query_cache.cache_count"),
     'indices.cache.filter.total-count':
         Stat("counter", "nodes.%s.indices.query_cache.total_count"),
+    'indices.search.scroll-time':
+        Stat("counter", "nodes.%s.indices.search.scroll_time_in_millis"),
+    'indices.search.scroll.total':
+        Stat("counter", "nodes.%s.indices.search.scroll_total"),
+    'indices.search.scroll.current':
+        Stat("gauge", "nodes.%s.indices.search.scroll_current"),
 }
 
 # ElasticSearch 1.3.0
