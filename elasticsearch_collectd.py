@@ -348,6 +348,18 @@ NODE_STATS_ES_2 = {
         Stat("gauge", "nodes.%s.indices.search.scroll_current"),
 }
 
+# DICT: ElasticSearch 2.2.x
+NODE_STATS_ES_2_2 = {
+    'indices.cache.query-cache.evictions':
+        Stat("counter", "nodes.%s.indices.query_cache.evictions"),
+    'indices.cache.query-cache.size':
+        Stat("gauge", "nodes.%s.indices.query_cache.memory_size_in_bytes"),
+    'indices.cache.query-cache.hits':
+        Stat("counter", "nodes.%s.indices.query_cache.hit_count"),
+    'indices.cache.query-cache.total':
+        Stat("counter", "nodes.%s.indices.query_cache.total_count"),
+}
+
 # ElasticSearch 1.3.0
 INDEX_STATS_ES_1_3 = {
     # SEGMENTS
@@ -807,6 +819,9 @@ def init_stats():
                   "/_nodes/_local/stats/transport,http,process,jvm,indices," \
                   "thread_pool"
     NODE_STATS_CUR = dict(NODE_STATS.items())
+    if ES_VERSION.startswith("2.2"):
+      NODE_STATS_CUR.update(NODE_STATS_ES_2_2)
+
     INDEX_STATS_CUR = dict(INDEX_STATS.items())
     if not ES_VERSION.startswith("1."):
         NODE_STATS_CUR.update(NODE_STATS_ES_2)
