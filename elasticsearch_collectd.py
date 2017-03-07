@@ -54,6 +54,7 @@ SKIP_COUNT = 0
 CLUSTER_STATUS = {'green': 0, 'yellow': 1, 'red': 2}
 
 DETAILED_METRICS = True
+INDEX_SUMMARY_ONLY = False
 THREAD_POOLS = []
 CONFIGURED_THREAD_POOLS = set()
 
@@ -646,7 +647,7 @@ def configure_callback(conf):
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
         CONFIGURED_THREAD_POOLS, DEFAULTS, ES_USERNAME, ES_PASSWORD, \
-        MASTER_ONLY
+        MASTER_ONLY, INDEX_SUMMARY_ONLY
 
     for node in conf.children:
         if node.key == 'Host':
@@ -679,6 +680,8 @@ def configure_callback(conf):
             INDEX_INTERVAL = int(node.values[0])
         elif node.key == "DetailedMetrics":
             DETAILED_METRICS = str_to_bool(node.values[0])
+        elif node.key == "IndexSummaryOnly":
+            INDEX_SUMMARY_ONLY = str_to_bool(node.values[0])
         elif node.key == "ThreadPools":
             for thread_pool in node.values:
                 CONFIGURED_THREAD_POOLS.add(thread_pool)
@@ -701,6 +704,7 @@ def configure_callback(conf):
     log.info('COLLECTION_INTERVAL: %s' % COLLECTION_INTERVAL)
     log.info('INDEX_INTERVAL: %s' % INDEX_INTERVAL)
     log.info('DETAILED_METRICS: %s' % DETAILED_METRICS)
+    log.info('INDEX_SUMMARY_ONLY: %s' % INDEX_SUMMARY_ONLY)
     log.info('CONFIGURED_THREAD_POOLS: %s' % CONFIGURED_THREAD_POOLS)
     log.info('METRICS TO COLLECT: %s' % DEFAULTS)
     log.info('MASTER_ONLY: %s' % MASTER_ONLY)
@@ -912,10 +916,14 @@ def fetch_stats():
         SKIP_COUNT = 0
         indices = fetch_url(ES_INDEX_URL)
         if indices:
-            indexes_json_stats = indices['indices']
-            for index_name in indexes_json_stats.keys():
-                log.info('Parsing index stats for index: %s' % index_name)
-                parse_index_stats(indexes_json_stats[index_name], index_name)
+            if INDEX_SUMMARY_ONLY:
+                log.info('Parsing index stats for _all summary')
+                parse_index_stats(indices['_all'], '_all')
+            else:
+	        indexes_json_stats = indices['indices']
+                for index_name in indexes_json_stats.keys():
+                    log.info('Parsing index stats for index: %s' % index_name)
+                    parse_index_stats(indexes_json_stats[index_name], index_name)
     # Incrememnt skip count
     SKIP_COUNT += 1
 
