@@ -31,6 +31,8 @@ ES_MASTER_ELIGIBLE = None
 
 ENABLE_INDEX_STATS = True
 ENABLE_CLUSTER_STATS = True
+ENABLE_SSL = False
+HTTP_PREFIX = "http://"
 
 ES_NODE_URL = ""
 ES_CLUSTER_URL = ""
@@ -646,7 +648,7 @@ def configure_callback(conf):
         ES_CLUSTER, ES_INDEX, ENABLE_INDEX_STATS, ENABLE_CLUSTER_STATS, \
         DETAILED_METRICS, COLLECTION_INTERVAL, INDEX_INTERVAL, \
         CONFIGURED_THREAD_POOLS, DEFAULTS, ES_USERNAME, ES_PASSWORD, \
-        MASTER_ONLY
+        MASTER_ONLY, HTTP_PREFIX, ENABLE_SSL
 
     for node in conf.children:
         if node.key == 'Host':
@@ -690,6 +692,9 @@ def configure_callback(conf):
                 DEFAULTS.add(metric_name)
         elif node.key == "IndexStatsMasterOnly":
             MASTER_ONLY = str_to_bool(node.values[0])
+        elif node.key == 'EnableSSL':
+            ENABLE_SSL = str_to_bool(node.values[0])
+            HTTP_PREFIX = "https://"
         else:
             log.warning('Unknown config key: %s.' % node.key)
 
@@ -704,6 +709,7 @@ def configure_callback(conf):
     log.info('CONFIGURED_THREAD_POOLS: %s' % CONFIGURED_THREAD_POOLS)
     log.info('METRICS TO COLLECT: %s' % DEFAULTS)
     log.info('MASTER_ONLY: %s' % MASTER_ONLY)
+    log.info('ENABLE SSL: %s' % ENABLE_SSL)
 
     # determine node information
     load_es_info()
@@ -803,7 +809,7 @@ def init_stats():
 
     sanatize_intervals()
 
-    ES_NODE_URL = "http://" + ES_HOST + ":" + str(ES_PORT) + \
+    ES_NODE_URL = HTTP_PREFIX + ES_HOST + ":" + str(ES_PORT) + \
                   "/_nodes/_local/stats/transport,http,process,jvm,indices," \
                   "thread_pool"
     NODE_STATS_CUR = dict(NODE_STATS.items())
@@ -823,10 +829,10 @@ def init_stats():
     # version agnostic settings
     if not ES_INDEX:
         # get all index stats
-        ES_INDEX_URL = "http://" + ES_HOST + \
+        ES_INDEX_URL = HTTP_PREFIX + ES_HOST + \
                        ":" + str(ES_PORT) + "/_all/_stats"
     else:
-        ES_INDEX_URL = "http://" + ES_HOST + ":" + \
+        ES_INDEX_URL = HTTP_PREFIX + ES_HOST + ":" + \
                        str(ES_PORT) + "/" + ",".join(ES_INDEX) + "/_stats"
 
     # common thread pools for all ES versions
@@ -856,7 +862,7 @@ def init_stats():
 
     remove_deprecated_threads()
 
-    ES_CLUSTER_URL = "http://" + ES_HOST + \
+    ES_CLUSTER_URL = HTTP_PREFIX + ES_HOST + \
                      ":" + str(ES_PORT) + "/_cluster/health"
 
     log.notice('Initialized with version=%s, host=%s, port=%s, url=%s' %
@@ -945,7 +951,7 @@ def fetch_url(url):
 def load_es_info():
     global ES_VERSION, ES_CLUSTER, ES_MASTER_ELIGIBLE, NODE_ID
 
-    json = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT) +
+    json = fetch_url(HTTP_PREFIX + ES_HOST + ":" + str(ES_PORT) +
                      "/_nodes/_local")
     if json is None:
         # assume some sane defaults
@@ -989,7 +995,7 @@ def detect_es_master():
     ES_CURRENT_MASTER"""
     global ES_CURRENT_MASTER
     # determine current master
-    cluster_state = fetch_url("http://" + ES_HOST + ":" + str(ES_PORT) +
+    cluster_state = fetch_url(HTTP_PREFIX + ES_HOST + ":" + str(ES_PORT) +
                               "/_cluster/state/master_node")
     if ES_CURRENT_MASTER is False and cluster_state['master_node'] == NODE_ID:
         ES_CURRENT_MASTER = True
