@@ -953,7 +953,9 @@ class Cluster(object):
             ctx = None
             if self.es_url_scheme == "https":
                 ctx = ssl._create_unverified_context()
-            response = urllib2.urlopen(request, context=ctx, timeout=10)
+                response = urllib2.urlopen(request, context=ctx, timeout=10)
+            else:
+                response = urllib2.urlopen(request, timeout=10)
             log.info('Raw api response: %s' % response)
             return json.load(response)
         except (urllib2.URLError, urllib2.HTTPError), e:

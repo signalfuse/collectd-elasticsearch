@@ -12,6 +12,7 @@ A [CollectD](http://collectd.org) plugin to collect [Elasticsearch](https://gith
 
  * collectd 4.9+
  * Elasticsearch 1.x or newer.
+ * python v2.6 or newer (https support requires v2.7.9)
 
 ## Configuration
 
