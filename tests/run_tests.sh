@@ -13,7 +13,7 @@ trap 'rm -f $tmpfile' 1 2 3 15
 for scenario in `ls data`; do
   echo -n "testing against ES $scenario"
 
-  ${PYTHON} ./simulate.py data/${scenario} &> /dev/null &
+  ${PYTHON} ./simulate.py data/${scenario} &
   pid="$!"
   ${PYTHON} ../elasticsearch_collectd.py > $tmpfile
   if [ $? != 0 ]; then
