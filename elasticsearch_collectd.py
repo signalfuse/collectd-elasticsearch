@@ -776,20 +776,20 @@ class Cluster(object):
                                       self.collection_interval - \
                                       (self.index_interval %
                                        self.collection_interval)
-                log.warning('The Elasticsearch Index Interval must be \
-                            greater or equal to than and divisible by the \
-                            collection Interval.  The Elasticsearch Index \
-                            Interval has been rounded to: %s' %
+                log.warning(('The Elasticsearch Index Interval must be '
+                             'greater or equal to than and divisible by the '
+                             'collection Interval.  The Elasticsearch Index '
+                             'Interval has been rounded to: %s') %
                             self.index_interval)
 
         # ? self.index_interval < self.collection_interval :
         #   Set self.index_interval = self.collection_interval
         elif self.index_interval < self.collection_interval:
             self.index_interval = self.collection_interval
-            log.warning('WARN: The Elasticsearch Index Interval must be \
-                        greater or equal to than and divisible by the \
-                        collection Interval.  The Elasticsearch Index \
-                        Interval has been rounded to: %s' %
+            log.warning(('WARN: The Elasticsearch Index Interval must be '
+                         'greater or equal to than and divisible by the '
+                         'collection Interval.  The Elasticsearch Index '
+                         'Interval has been rounded to: %s') %
                         self.index_interval)
 
         # self.index_skip = self.index_interval / self.collection_interval
