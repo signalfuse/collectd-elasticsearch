@@ -762,8 +762,8 @@ class Cluster(object):
         self.extra_dimensions = ''
 
     def sanatize_intervals(self):
-        """Sanitizes the index interval to be greater or equal to and divisible by
-        the collection interval
+        """Sanitizes the index interval to be greater or equal to and divisible
+        by the collection interval
         """
         # Sanitize the self.collection_interval and self.index_interval
         # ? self.index_interval > self.collection_interval:
@@ -777,8 +777,9 @@ class Cluster(object):
                                       (self.index_interval %
                                        self.collection_interval)
                 log.warning('The Elasticsearch Index Interval must be \
-    greater or equal to than and divisible by the collection Interval.  The \
-    Elasticsearch Index Interval has been rounded to: %s' %
+                            greater or equal to than and divisible by the \
+                            collection Interval.  The Elasticsearch Index \
+                            Interval has been rounded to: %s' %
                             self.index_interval)
 
         # ? self.index_interval < self.collection_interval :
@@ -786,8 +787,9 @@ class Cluster(object):
         elif self.index_interval < self.collection_interval:
             self.index_interval = self.collection_interval
             log.warning('WARN: The Elasticsearch Index Interval must be \
-    greater or equal to than and divisible by the collection Interval.  The \
-    Elasticsearch Index Interval has been rounded to: %s' %
+                        greater or equal to than and divisible by the \
+                        collection Interval.  The Elasticsearch Index \
+                        Interval has been rounded to: %s' %
                         self.index_interval)
 
         # self.index_skip = self.index_interval / self.collection_interval
