@@ -2,7 +2,7 @@ version: '2'
 jobs:
   build:
     docker:
-      - image: ubuntu:yakkety
+      - image: ubuntu:xenial
     working_directory: ~/code
     steps:
       - setup_remote_docker

@@ -1019,6 +1019,10 @@ class Cluster(object):
         cluster_state = self.fetch_url(self.es_url_scheme + "://" +
                                        self.es_host + ":" + str(self.es_port) +
                                        "/_cluster/state/master_node")
+        if cluster_state is None:
+            self.es_current_master = False
+            return
+
         if self.es_current_master is False \
            and cluster_state['master_node'] == self.node_id:
             self.es_current_master = True
