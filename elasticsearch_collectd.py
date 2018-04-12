@@ -637,6 +637,8 @@ def configure_callback(conf):
                 'overriding elasticsearch version number to %s' % c.es_version)
         elif node.key == 'Indexes':
             c.es_index = node.values
+        elif node.key == 'IndexesSeparateGraph':
+            c.es_index_separate_graph = str_to_bool(node.values[0])
         elif node.key == 'EnableIndexStats':
             c.enable_index_stats = str_to_bool(node.values[0])
         elif node.key == 'EnableClusterHealth':
@@ -668,6 +670,7 @@ def configure_callback(conf):
     log.info('host: %s' % c.es_host)
     log.info('port: %s' % c.es_port)
     log.info('es_index: %s' % c.es_index)
+    log.info('es_index_separate_graphx: %s' % c.es_index_separate_graph)
     log.info('enable_index_stats: %s' % c.enable_index_stats)
     log.info('enable_cluster_stats: %s' % c.enable_cluster_stats)
     log.info('self.collection_interval: %s' % c.collection_interval)
@@ -732,6 +735,7 @@ class Cluster(object):
         self.es_cluster = None
         self.es_version = None
         self.es_index = []
+        self.es_index_separate_graph = False
         self.enable_index_stats = True
         self.enable_cluster_stats = True
         self.index_interval = 300
@@ -1082,7 +1086,11 @@ class Cluster(object):
                 # the index as a dimensions
                 name = name.format(
                     index_name=sanitize_type_instance(index_name))
-                self.dispatch_stat(result, name, key)
+                if self.es_index_separate_graph:
+                    repl_string = 'indices[index=%s].' % (index_name)
+                    self.dispatch_stat(result, name.replace(repl_string, ''), key, {'index': index_name})
+                else:
+                    self.dispatch_stat(result, name, key)
 
     def dispatch_stat(self, result, name, key, dimensions=None):
         """Read a key from info response data and dispatch a value"""
