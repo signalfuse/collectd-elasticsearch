@@ -686,11 +686,19 @@ def configure_callback(conf):
     # register the read callback now that we have the complete config
     collectd.register_read(read_callback,
                            interval=c.collection_interval,
-                           name=c.es_cluster,
+                           name=get_unique_name(c.es_host,
+                                            c.es_port, c.es_index),
                            data=c)
     log.notice(
         'started elasticsearch plugin with interval = %d seconds' %
         c.collection_interval)
+
+
+def get_unique_name(host, port, index):
+    if index:
+        return ('%s:%s:%s' % (host, port, index))
+    else:
+        return ('%s:%s' % (host, port))
 
 
 def remove_deprecated_elements(deprecated, elements, version):
