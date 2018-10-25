@@ -974,8 +974,6 @@ class Cluster(object):
             # assume some sane defaults
             if self.es_version is None:
                 self.es_version = "1.0.0"
-            if self.es_cluster is None:
-                self.es_cluster = "elasticsearch"
             self.es_master_eligible = True
             log.warning('Unable to determine node information, defaulting to \
                         version %s, cluster %s and master %s' %
@@ -1092,6 +1090,15 @@ class Cluster(object):
                                                              r=result))
         if result is None:
             log.warning('Value not found for %s' % name)
+            return
+
+        # If we failed to get the cluster name and do not have a config
+        # option set for it, do not emit data
+        if self.es_cluster is None:
+            log.warning('Failed to determine Cluster name in read_callback' +
+                            'and no Cluster config option specified. ' +
+                            'Will not emit datapoints since plugin_instance ' +
+                            'which is the cluster name could not be determined')
             return
         estype = key.type
         value = int(result)
