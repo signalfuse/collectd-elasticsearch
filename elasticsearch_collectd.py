@@ -22,7 +22,6 @@ import logging
 import ssl
 
 PREFIX = "elasticsearch"
-CLUSTERS = []
 
 DEFAULTS = set([
     # AUTOMATICALLY GENERATED METRIC NAMES
@@ -582,14 +581,20 @@ THREAD_POOL_METRICS = {
 
 
 # collectd callbacks
-def read_callback():
+def read_callback(cluster):
     """called by collectd to gather stats. It is called per collection
     interval.
     If this method throws, the plugin will be skipped for an increasing amount
     of time until it returns normally again"""
     log.info('Read callback called')
-    for c in CLUSTERS:
-        c.fetch_stats()
+
+    # determine node information
+    cluster.load_es_info()
+
+    # initialize stats map based on ES version
+    cluster.init_stats()
+
+    cluster.fetch_stats()
 
 
 def str_to_bool(value):
@@ -678,17 +683,11 @@ def configure_callback(conf):
     log.info('metrics to collect: %s' % c.defaults)
     log.info('master_only: %s' % c.master_only)
 
-    # determine node information
-    c.load_es_info()
-
-    # initialize stats map based on ES version
-    c.init_stats()
-
-    # add the cluster config to the list of clusters to monitor
-    CLUSTERS.append(c)
-
     # register the read callback now that we have the complete config
-    collectd.register_read(read_callback, interval=c.collection_interval)
+    collectd.register_read(read_callback,
+                           interval=c.collection_interval,
+                           name=c.es_cluster,
+                           data=c)
     log.notice(
         'started elasticsearch plugin with interval = %d seconds' %
         c.collection_interval)
