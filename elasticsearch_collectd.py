@@ -993,7 +993,6 @@ class Cluster(object):
         self.node_id = json['nodes'].keys()[0]
         log.notice('current node id: %s' % self.node_id)
 
-        cluster_name = json['cluster_name']
         # we should have only one entry with the current node information
         node_info = json['nodes'].itervalues().next()
         version = node_info['version']
@@ -1011,8 +1010,6 @@ class Cluster(object):
         self.es_master_eligible = master_eligible
         if self.es_version is None:
             self.es_version = version
-        if self.es_cluster is None:
-            self.es_cluster = cluster_name
 
         log.notice('version: %s, cluster: %s, master eligible: %s' %
                    (self.es_version, self.es_cluster, self.es_master_eligible))
