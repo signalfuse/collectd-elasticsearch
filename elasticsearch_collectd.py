@@ -633,9 +633,9 @@ def configure_callback(conf):
         elif node.key == 'Verbose':
             handle.verbose = str_to_bool(node.values[0])
         elif node.key == 'Cluster':
-            c.es_cluster = node.values[0]
+            c.es_cluster_from_config = node.values[0]
             log.notice(
-                'overriding elasticsearch cluster name to %s' % c.es_cluster)
+                'overriding elasticsearch cluster name to %s' % c.es_cluster_from_config)
         elif node.key == 'Version':
             c.es_version = node.values[0]
             log.notice(
@@ -737,6 +737,7 @@ class Cluster(object):
         self.es_username = ""
         self.es_password = ""
         self.es_cluster = None
+        self.es_cluster_from_config = None
         self.es_version = None
         self.es_index = []
         self.enable_index_stats = True
@@ -907,9 +908,16 @@ class Cluster(object):
 
         node_json_stats = self.fetch_url(self.es_node_url)
         if node_json_stats:
-            if self.es_cluster is None:
-                self.es_cluster = node_json_stats['cluster_name']
+            # Only if Cluster name is not provided as a config option, use the
+            # value retured from the ES endpoint
+            if self.es_cluster_from_config is None:
+                es_cluster_from_endpoint = node_json_stats['cluster_name']
+                # Check if cluster name matches from what the plugin saw in the
+                # previous interval, in not, update the cluster name
+                if es_cluster_from_endpoint != self.es_cluster:
+                    self.es_cluster = es_cluster_from_endpoint
             else:
+                self.es_cluster = self.es_cluster_from_config
                 log.info('Configured with cluster_json_stats=%s' %
                          self.es_cluster)
             log.info('Parsing node_json_stats')
@@ -1000,7 +1008,9 @@ class Cluster(object):
 
         # update settings
         self.es_master_eligible = master_eligible
-        if self.es_version is None:
+        # Update version if it is different from the version seen in the
+        # previous interval
+        if self.es_version != version:
             self.es_version = version
 
         log.notice('version: %s, cluster: %s, master eligible: %s' %
