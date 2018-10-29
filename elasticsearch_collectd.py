@@ -979,14 +979,6 @@ class Cluster(object):
         json = self.fetch_url(self.es_url_scheme + "://" + self.es_host + ":" +
                               str(self.es_port) + "/_nodes/_local")
         if json is None:
-            # assume some sane defaults
-            if self.es_version is None:
-                self.es_version = "1.0.0"
-            self.es_master_eligible = True
-            log.warning('Unable to determine node information, defaulting to \
-                        version %s, cluster %s and master %s' %
-                        (self.es_version, self.es_cluster,
-                         self.es_master_eligible))
             return
 
         # Identify the current node
@@ -1104,6 +1096,13 @@ class Cluster(object):
                             'and no Cluster config option specified. ' +
                             'Will not emit datapoints since plugin_instance ' +
                             'which is the cluster name could not be determined')
+            return
+
+        if self.es_version is None:
+            log.warning('Failed to determine ES version in read_callback. ' +
+                            'Will not emit datapoints since plugin_instance ' +
+                            'this interval. Will attempt to fetch version in the ' +
+                            'next interval.')
             return
         estype = key.type
         value = int(result)
