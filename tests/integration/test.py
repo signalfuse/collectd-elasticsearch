@@ -15,6 +15,7 @@ VERSIONS_TESTED = [
     '1.7.6',
     '2.4.5',
     '5.3.2',
+    '5.6.3',
 ]
 TIMEOUT_SECS = 60
 
