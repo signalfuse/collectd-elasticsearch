@@ -22,7 +22,6 @@ import logging
 import ssl
 
 PREFIX = "elasticsearch"
-CLUSTERS = []
 
 DEFAULTS = set([
     # AUTOMATICALLY GENERATED METRIC NAMES
@@ -582,14 +581,20 @@ THREAD_POOL_METRICS = {
 
 
 # collectd callbacks
-def read_callback():
+def read_callback(cluster):
     """called by collectd to gather stats. It is called per collection
     interval.
     If this method throws, the plugin will be skipped for an increasing amount
     of time until it returns normally again"""
     log.info('Read callback called')
-    for c in CLUSTERS:
-        c.fetch_stats()
+
+    # determine node information
+    cluster.load_es_info()
+
+    # initialize stats map based on ES version
+    cluster.init_stats()
+
+    cluster.fetch_stats()
 
 
 def str_to_bool(value):
@@ -628,9 +633,9 @@ def configure_callback(conf):
         elif node.key == 'Verbose':
             handle.verbose = str_to_bool(node.values[0])
         elif node.key == 'Cluster':
-            c.es_cluster = node.values[0]
+            c.es_cluster_from_config = node.values[0]
             log.notice(
-                'overriding elasticsearch cluster name to %s' % c.es_cluster)
+                'overriding elasticsearch cluster name to %s' % c.es_cluster_from_config)
         elif node.key == 'Version':
             c.es_version = node.values[0]
             log.notice(
@@ -678,20 +683,22 @@ def configure_callback(conf):
     log.info('metrics to collect: %s' % c.defaults)
     log.info('master_only: %s' % c.master_only)
 
-    # determine node information
-    c.load_es_info()
-
-    # initialize stats map based on ES version
-    c.init_stats()
-
-    # add the cluster config to the list of clusters to monitor
-    CLUSTERS.append(c)
-
     # register the read callback now that we have the complete config
-    collectd.register_read(read_callback, interval=c.collection_interval)
+    collectd.register_read(read_callback,
+                           interval=c.collection_interval,
+                           name=get_unique_name(c.es_host,
+                                            c.es_port, c.es_index),
+                           data=c)
     log.notice(
         'started elasticsearch plugin with interval = %d seconds' %
         c.collection_interval)
+
+
+def get_unique_name(host, port, index):
+    if index:
+        return ('%s:%s:%s' % (host, port, index))
+    else:
+        return ('%s:%s' % (host, port))
 
 
 def remove_deprecated_elements(deprecated, elements, version):
@@ -730,6 +737,7 @@ class Cluster(object):
         self.es_username = ""
         self.es_password = ""
         self.es_cluster = None
+        self.es_cluster_from_config = None
         self.es_version = None
         self.es_index = []
         self.enable_index_stats = True
@@ -900,11 +908,13 @@ class Cluster(object):
 
         node_json_stats = self.fetch_url(self.es_node_url)
         if node_json_stats:
-            if self.es_cluster is None:
+            # Only if Cluster name is not provided as a config option, use the
+            # value retured from the ES endpoint
+            if self.es_cluster_from_config is None:
                 self.es_cluster = node_json_stats['cluster_name']
             else:
-                log.info('Configured with cluster_json_stats=%s' %
-                         self.es_cluster)
+                self.es_cluster = self.es_cluster_from_config
+            log.info('Configured with cluster_name=%s' % self.es_cluster)
             log.info('Parsing node_json_stats')
             self.parse_node_stats(node_json_stats, self.node_stats_cur)
             log.info('Parsing thread pool stats')
@@ -972,23 +982,12 @@ class Cluster(object):
         json = self.fetch_url(self.es_url_scheme + "://" + self.es_host + ":" +
                               str(self.es_port) + "/_nodes/_local")
         if json is None:
-            # assume some sane defaults
-            if self.es_version is None:
-                self.es_version = "1.0.0"
-            if self.es_cluster is None:
-                self.es_cluster = "elasticsearch"
-            self.es_master_eligible = True
-            log.warning('Unable to determine node information, defaulting to \
-                        version %s, cluster %s and master %s' %
-                        (self.es_version, self.es_cluster,
-                         self.es_master_eligible))
             return
 
         # Identify the current node
         self.node_id = json['nodes'].keys()[0]
         log.notice('current node id: %s' % self.node_id)
 
-        cluster_name = json['cluster_name']
         # we should have only one entry with the current node information
         node_info = json['nodes'].itervalues().next()
         version = node_info['version']
@@ -1004,10 +1003,7 @@ class Cluster(object):
 
         # update settings
         self.es_master_eligible = master_eligible
-        if self.es_version is None:
-            self.es_version = version
-        if self.es_cluster is None:
-            self.es_cluster = cluster_name
+        self.es_version = version
 
         log.notice('version: %s, cluster: %s, master eligible: %s' %
                    (self.es_version, self.es_cluster, self.es_master_eligible))
@@ -1093,6 +1089,22 @@ class Cluster(object):
                                                              r=result))
         if result is None:
             log.warning('Value not found for %s' % name)
+            return
+
+        # If we failed to get the cluster name and do not have a config
+        # option set for it, do not emit data
+        if self.es_cluster is None:
+            log.warning('Failed to determine Cluster name in read_callback' +
+                            'and no Cluster config option specified. ' +
+                            'Will not emit datapoints since plugin_instance ' +
+                            'which is the cluster name could not be determined')
+            return
+
+        if self.es_version is None:
+            log.warning('Failed to determine ES version in read_callback. ' +
+                            'Will not emit datapoints since plugin_instance ' +
+                            'this interval. Will attempt to fetch version in the ' +
+                            'next interval.')
             return
         estype = key.type
         value = int(result)
