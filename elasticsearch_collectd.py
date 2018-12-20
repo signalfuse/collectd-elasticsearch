@@ -267,13 +267,19 @@ DEPRECATED_NODE_STATS = [
         'major': 2,
         'minor': 0,
         'revision': 0,
-        'keys': ['process.mem.share_in_bytes'],
+        'keys': ['process.mem.share_in_bytes']
     },
     {
         'major': 5,
         'minor': 0,
         'revision': 0,
         'keys': ['indices.segments.index-writer-max-size']
+    },
+    {
+        'major': 6,
+        'minor': 3,
+        'revision': 2,
+        'keys': ['indices.store.throttle-time']
     }
 ]
 
@@ -769,7 +775,7 @@ class Cluster(object):
 
         self.extra_dimensions = ''
 
-    def sanatize_intervals(self):
+    def sanitize_intervals(self):
         """Sanitizes the index interval to be greater or equal to and divisible
         by the collection interval
         """
@@ -820,7 +826,7 @@ class Cluster(object):
 
     # helper methods
     def init_stats(self):
-        self.sanatize_intervals()
+        self.sanitize_intervals()
 
         self.es_node_url = self.es_url_scheme + "://" + self.es_host + ":" + \
             str(self.es_port) + \
@@ -909,7 +915,7 @@ class Cluster(object):
         node_json_stats = self.fetch_url(self.es_node_url)
         if node_json_stats:
             # Only if Cluster name is not provided as a config option, use the
-            # value retured from the ES endpoint
+            # value returned from the ES endpoint
             if self.es_cluster_from_config is None:
                 self.es_cluster = node_json_stats['cluster_name']
             else:
