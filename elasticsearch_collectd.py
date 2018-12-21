@@ -277,8 +277,8 @@ DEPRECATED_NODE_STATS = [
     },
     {
         'major': 6,
-        'minor': 3,
-        'revision': 2,
+        'minor': 0,
+        'revision': 0,
         'keys': ['indices.store.throttle-time']
     }
 ]
