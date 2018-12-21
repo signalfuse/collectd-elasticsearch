@@ -296,6 +296,12 @@ DEPRECATED_THREAD_POOLS = [
         'minor': 0,
         'revision': 0,
         'keys': ['suggest', 'percolate']
+    },
+    {
+        'major': 6,
+        'minor': 0,
+        'revision': 0,
+        'keys': ['bulk']
     }
 ]
 
@@ -320,6 +326,22 @@ NODE_STATS_ES_2 = {
         Stat("gauge", "nodes.%s.indices.search.scroll_current"),
 }
 
+# ElasticSearch 6.0.0
+NODE_STATS_ES_6 = {
+    "indices.translog.uncommitted_operations":
+        Stat("gauge", "nodes.%s.indices.translog.uncommitted_operations"),
+    "indices.translog.uncommitted_size_in_bytes":
+        Stat("gauge", "nodes.%s.indices.translog.uncommitted_size_in_bytes")
+}
+
+# ElasticSearch 6.3.0
+NODE_STATS_ES_6_3 = {
+    "indices.flush.periodic":
+        Stat("gauge", "nodes.%s.indices.flush.periodic"),
+    "indices.translog.earliest_last_modified_age":
+        Stat("gauge", "nodes.%s.indices.translog.earliest_last_modified_age"),
+}
+
 # ElasticSearch 1.3.0
 INDEX_STATS_ES_1_3 = {
     # SEGMENTS
@@ -338,6 +360,27 @@ INDEX_STATS_ES_1_1 = {
         Stat("counter", "primaries.suggest.time_in_millis"),
     "indices[index={index_name}].primaries.suggest.current":
         Stat("gauge", "primaries.suggest.current"),
+}
+
+# ElasticSearch 6.0.0
+INDEX_STATS_ES_6 = {
+    # SUGGEST
+    "indices[index={index_name}].primaries.flush.periodic":
+        Stat("gauge", "primaries.flush.periodic"),
+    "indices[index={index_name}].primaries.translog.earliest_last_modified_age":
+        Stat("gauge", "primaries.translog.earliest_last_modified_age"),
+    "indices[index={index_name}].primaries.translog.uncommitted_operations":
+        Stat("gauge", "primaries.translog.uncommitted_operations"),
+    "indices[index={index_name}].primaries.translog.uncommitted_size_in_bytes":
+        Stat("gauge", "primaries.translog.uncommitted_size_in_bytes"),
+    "indices[index={index_name}].total.flush.periodic":
+        Stat("counter", "total.flush.periodic"),
+    "indices[index={index_name}].total.translog.earliest_last_modified_age":
+        Stat("counter", "total.translog.earliest_last_modified_age"),
+    "indices[index={index_name}].total.translog.uncommitted_operations":
+        Stat("counter", "total.translog.uncommitted_operations"),
+    "indices[index={index_name}].total.translog.uncommitted_size_in_bytes":
+        Stat("counter", "total.translog.uncommitted_size_in_bytes"),
 }
 
 # ElasticSearch 1.0.0
@@ -836,6 +879,13 @@ class Cluster(object):
         self.index_stats_cur = dict(INDEX_STATS.items())
         if not self.es_version.startswith("1."):
             self.node_stats_cur.update(NODE_STATS_ES_2)
+
+        if self.es_version.startswith("6"):
+            self.node_stats_cur.update(NODE_STATS_ES_6)
+            self.index_stats_cur.update(INDEX_STATS_ES_6)
+
+        if self.es_version.startswith("6.3"):
+            self.node_stats_cur.update(NODE_STATS_ES_6_3)
 
         self.remove_deprecated_node_stats()
 
