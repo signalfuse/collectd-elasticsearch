@@ -299,8 +299,8 @@ DEPRECATED_THREAD_POOLS = [
     },
     {
         'major': 6,
-        'minor': 0,
-        'revision': 0,
+        'minor': 3,
+        'revision': 2,
         'keys': ['bulk']
     }
 ]
