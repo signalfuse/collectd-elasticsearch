@@ -10,4 +10,7 @@ cluster.name: es-${ELASTICSEARCH_VERSION}
 http.host: 0.0.0.0
 EOH
 
-exec /docker-entrypoint.sh elasticsearch
+case "$ELASTICSEARCH_VERSION" in
+ '6.3.2') exec docker-entrypoint.sh elasticsearch ;;
+       *) exec /docker-entrypoint.sh elasticsearch ;;
+esac

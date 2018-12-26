@@ -12,10 +12,11 @@ from time import time, sleep
 # integration tests if so desired.
 
 VERSIONS_TESTED_WITH_METRICS = {
-    '1.7.6' : ['indices.indexing.index-total'],
-    '2.4.5' : ['indices.cache.filter.evictions'],
-    '5.3.2' : ['indices.cache.filter.evictions'],
-    '5.6.3' : ['indices.cache.filter.evictions'],
+    '1.7.6': ['indices.indexing.index-total'],
+    '2.4.5': ['indices.cache.filter.evictions'],
+    '5.3.2': ['indices.cache.filter.evictions'],
+    '5.6.3': ['indices.cache.filter.evictions'],
+    '6.3.2': ['indices.cache.filter.evictions']
 }
 TIMEOUT_SECS = 60
 

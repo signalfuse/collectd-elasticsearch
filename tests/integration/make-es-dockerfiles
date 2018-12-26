@@ -1,6 +1,12 @@
 #!/bin/bash
 
-for version in 1.7.6 2.4.5 5.3.2
+for version in 1.7.6 2.4.5 5.3.2 5.6.3
 do
     sed -e "s/ES_VERSION/$version/" Dockerfile.es > Dockerfile.es.$version
+done
+
+for version in 6.3.2
+do
+    sed -e "s|FROM elasticsearch:ES_VERSION|FROM docker.elastic.co/elasticsearch/elasticsearch:ES_VERSION|" Dockerfile.es > Dockerfile.es.$version
+    sed -i "" "s/ES_VERSION/$version/" Dockerfile.es.$version
 done

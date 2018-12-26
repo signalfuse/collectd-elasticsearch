@@ -8,7 +8,7 @@ wait_for () {
     done
 }
 
-for host in es17 es24 es53 es56
+for host in es17 es24 es53 es56 es63
 do
   wait_for $host
 done
