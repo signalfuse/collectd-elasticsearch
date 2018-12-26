@@ -31,7 +31,7 @@ curl -s http://${ES_HOST}
 
 # populate elasticsearch with some dummy data to generate more interesting numbers
 curl -XPUT "http://${ES_HOST}/twitter"
-curl -XPUT "http://${ES_HOST}/twitter/tweet/1" -d'{"user":"jdoe", "message": "tweet tweet"}'
+curl -XPUT "http://${ES_HOST}/twitter/tweet/1" -H'Content-Type: application/json' -d'{"user":"jdoe", "message": "tweet tweet"}'
 
 # generate necessary output files
 curl -s "http://${ES_HOST}/_all/_stats" > $DIR/_all/_stats/index.json
