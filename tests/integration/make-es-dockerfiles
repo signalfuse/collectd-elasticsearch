@@ -7,6 +7,5 @@ done
 
 for version in 6.3.2
 do
-    sed -e "s|FROM elasticsearch:ES_VERSION|FROM docker.elastic.co/elasticsearch/elasticsearch:ES_VERSION|" Dockerfile.es > Dockerfile.es.$version
-    sed -i "" "s/ES_VERSION/$version/" Dockerfile.es.$version
+    sed -e "s/ES_VERSION/$version/" Dockerfile2.es > Dockerfile.es.$version
 done
