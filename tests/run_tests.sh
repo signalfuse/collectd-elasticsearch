@@ -8,6 +8,13 @@ PYTHON_VERSION=$(${PYTHON} -V 2>&1)
 
 echo "Interpreter version: ${PYTHON_VERSION}"
 
+echo "Running unit tests"
+py.test ../elasticsearch_collectd_test.py
+if [ "$?" -ne 0 ]; then
+    echo " [FAILED] unit tests returned non 0 exit code"
+    exit 1;
+fi
+
 tmpfile=$(mktemp /tmp/run_tests.sh.XXXXXX)
 trap 'rm -f $tmpfile' 1 2 3 15
 for scenario in `ls data`; do
