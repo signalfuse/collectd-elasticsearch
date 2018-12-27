@@ -27,6 +27,7 @@ jobs:
           name: Run basic tests
           working_directory: ~/code/tests
           command: |
+            pip install pytest
             bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
             grep -v -E 'FAILED|ERROR' /tmp/test.log || exit 1
       - run:
