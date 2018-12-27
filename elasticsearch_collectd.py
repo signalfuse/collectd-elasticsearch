@@ -761,8 +761,8 @@ def remove_deprecated_elements(deprecated, elements, version):
     # Iterate over deprecation lists and remove any keys that were deprecated
     # prior to the current version
     for dep in deprecated:
-        if (major >= dep['major']) \
-                or (major == dep['major'] and minor >= dep['minor']) \
+        if (major > dep['major']) \
+                or (major == dep['major'] and minor > dep['minor']) \
                 or (major == dep['major'] and minor == dep['minor']
                     and revision >= dep['revision']):
             if type(elements) is list:
