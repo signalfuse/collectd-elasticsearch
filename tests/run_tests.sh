@@ -9,7 +9,7 @@ PYTHON_VERSION=$(${PYTHON} -V 2>&1)
 echo "Interpreter version: ${PYTHON_VERSION}"
 
 echo "Running unit tests"
-py.test ../elasticsearch_collectd_test.py
+pytest ../elasticsearch_collectd_test.py
 if [ "$?" -ne 0 ]; then
     echo " [FAILED] unit tests returned non 0 exit code"
     exit 1;
