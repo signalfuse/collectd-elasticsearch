@@ -12,7 +12,7 @@ jobs:
             set -x
             VER="17.03.0-ce"
             apt-get update -q
-            apt-get install -yq curl python
+            apt-get install -yq curl python-pip
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -27,8 +27,10 @@ jobs:
           name: Run basic tests
           working_directory: ~/code/tests
           command: |
+            pip install pytest
+            pip install mock
             bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
-            grep -v -E 'FAILED|ERROR' /tmp/test.log || exit 1
+            ! grep -E 'FAILED|ERROR' /tmp/test.log > /dev/null || exit 1
       - run:
           name: Run integration tests
           working_directory: ~/code/tests/integration

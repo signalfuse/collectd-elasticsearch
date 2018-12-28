@@ -42,7 +42,6 @@ def wait_for_metrics_from_each_cluster():
             print 'Waiting for metric: %s from cluster %s...' % (metric, c)
             eventually_true(lambda: any([metric in str(m.get('type_instance')) for m in get_metric_data()]),
                             TIMEOUT_SECS - (time() - start))
-
             print 'metric: %s Found! from cluster: %s' % (metric, c)
 
 
