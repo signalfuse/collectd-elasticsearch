@@ -1,5 +1,17 @@
+import sys
+
+import mock
 import pytest
-from elasticsearch_collectd_utils import remove_deprecated_elements
+
+
+class MockCollectd(mock.MagicMock):
+    pass
+
+
+sys.modules['collectd'] = MockCollectd()
+
+
+from elasticsearch_collectd import remove_deprecated_elements
 
 
 @pytest.mark.parametrize("deprecated_elements, input_elements, version, expected_elements", [
