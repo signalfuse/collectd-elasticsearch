@@ -22,7 +22,7 @@ for scenario in `ls data`; do
 
   ${PYTHON} ./simulate.py data/${scenario} &
   pid="$!"
-  ${PYTHON} ../elasticsearch_collectd.py >> $tmpfile
+  ${PYTHON} ../elasticsearch_collectd.py > $tmpfile
   if [ $? != 0 ]; then
     echo " [FAILED] returned non 0 exit code"
   else
