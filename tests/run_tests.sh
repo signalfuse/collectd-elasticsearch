@@ -13,9 +13,11 @@ trap 'rm -f $tmpfile' 1 2 3 15
 
 echo "Running unit tests"
 pytest ../elasticsearch_collectd_test.py > $tmpfile
+status=$?
 if [ "$?" != 0 ]; then
     echo " [FAILED] unit tests returned non 0 exit code"
     cat $tmpfile
+    exit $status
 fi
 
 for scenario in `ls data`; do
