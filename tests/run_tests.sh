@@ -12,7 +12,6 @@ echo "Running unit tests"
 pytest ../elasticsearch_collectd_test.py
 status=$?
 if [[ "$status" != 0 ]]; then
-    echo " [FAILED] unit tests returned non 0 exit code"
     exit ${status}
 fi
 
