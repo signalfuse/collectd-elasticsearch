@@ -12,5 +12,4 @@ ADD tests/integration/wait_for_es /.docker/wait_for_es
 
 ## The context of the image build should be the root dir of this repo!!
 ADD elasticsearch_collectd.py /usr/share/collectd/collectd-elasticsearch/
-ADD elasticsearch_collectd_utils.py /usr/share/collectd/collectd-elasticsearch/
 ADD tests/integration/20-elasticsearch-test.conf /etc/collectd/managed_config/
