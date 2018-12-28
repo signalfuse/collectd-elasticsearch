@@ -4,7 +4,7 @@ A [CollectD](http://collectd.org) plugin to collect [Elasticsearch](https://gith
 
 ## Installation
 
- 1. Place the `elasticsearch_collectd.py` and `elasticsearch_collectd_utils.py` files into a directory on the host. The recommended directory is `/usr/share/collectd/collectd-elasticsearch`.
+ 1. Place the `elasticsearch_collectd.py` file into a directory on the host. The recommended directory is `/usr/share/collectd/collectd-elasticsearch`.
  1. Configure the plugin (see below).
  1. Restart collectd.
 
