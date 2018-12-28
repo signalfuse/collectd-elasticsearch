@@ -8,9 +8,6 @@ PYTHON_VERSION=$(${PYTHON} -V 2>&1)
 
 echo "Interpreter version: ${PYTHON_VERSION}"
 
-tmpfile=$(mktemp /tmp/run_tests.sh.XXXXXX)
-trap 'rm -f $tmpfile' 1 2 3 15
-
 echo "Running unit tests"
 pytest ../elasticsearch_collectd_test.py > $tmpfile
 status=$?
@@ -20,6 +17,8 @@ if [[ "$status" != 0 ]]; then
     exit ${status}
 fi
 
+tmpfile=$(mktemp /tmp/run_tests.sh.XXXXXX)
+trap 'rm -f $tmpfile' 1 2 3 15
 for scenario in `ls data`; do
   echo -n "testing against ES $scenario"
 

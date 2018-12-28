@@ -29,6 +29,7 @@ jobs:
           command: |
             pip install pytest
             bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
+            cat /tmp/test.log
             grep -v -E 'FAILED|ERROR' /tmp/test.log || exit 1
       - run:
           name: Run integration tests
