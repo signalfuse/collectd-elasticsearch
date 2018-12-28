@@ -9,11 +9,10 @@ PYTHON_VERSION=$(${PYTHON} -V 2>&1)
 echo "Interpreter version: ${PYTHON_VERSION}"
 
 echo "Running unit tests"
-pytest ../elasticsearch_collectd_test.py > $tmpfile
+pytest ../elasticsearch_collectd_test.py
 status=$?
 if [[ "$status" != 0 ]]; then
     echo " [FAILED] unit tests returned non 0 exit code"
-    cat $tmpfile
     exit ${status}
 fi
 
