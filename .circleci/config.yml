@@ -28,6 +28,7 @@ jobs:
           working_directory: ~/code/tests
           command: |
             pip install pytest
+            pip install mock
             bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
             ! grep -E 'FAILED|ERROR' /tmp/test.log > /dev/null || exit 1
       - run:
