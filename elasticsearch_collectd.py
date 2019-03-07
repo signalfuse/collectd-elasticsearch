@@ -948,13 +948,7 @@ class Cluster(object):
     def lookup_node_stat(self, stat, json):
         node = json['nodes'].keys()[0]
         val = dig_it_up(json, self.node_stats_cur[stat].path % node)
-
-        # Check to make sure we have a valid result
-        # dig_it_up returns False if no match found
-        if not isinstance(val, bool):
-            return int(val)
-        else:
-            return None
+        return val
 
     def fetch_stats(self):
         """
@@ -1104,12 +1098,6 @@ class Cluster(object):
                     if self.detailed_metrics is True or name in self.defaults:
                         node = json['nodes'].keys()[0]
                         result = dig_it_up(json, key.path % node)
-                        # Check to make sure we have a valid result
-                        # dig_it_up returns False if no match found
-                        if not isinstance(result, bool):
-                            result = int(result)
-                        else:
-                            result = None
 
                         self.dispatch_stat(result, name, key,
                                            {'thread_pool': pool})
@@ -1144,7 +1132,7 @@ class Cluster(object):
                                                              d=dimensions,
                                                              r=result))
         if result is None:
-            log.warning('Value not found for %s' % name)
+            log.debug('Value not found for %s' % name)
             return
 
         # If we failed to get the cluster name and do not have a config
@@ -1210,7 +1198,7 @@ def dig_it_up(obj, path):
             path = path.split('.')
         return reduce(lambda x, y: x[y], path, obj)
     except:
-        return False
+        return None
 
 
 # The following classes are there to launch the plugin manually
