@@ -926,6 +926,17 @@ class Cluster(object):
            and not self.es_version.startswith("2.0"):
             thread_pools.extend(['force_merge'])
 
+        # Add the 6.3 metrics
+        if self.es_version.startswith("6."):
+            if self.es_version[2:].find(".") != -1:
+                minor_release_number = self.es_version[2: 2 + self.es_version[2:].find(".")]
+            else:
+                minor_release_number = self.es_version[2:]
+            if int(minor_release_number) > 2:
+                thread_pools.extend(['write'])
+        elif int(self.es_version[:self.es_version.find(".")]) > 6:
+            thread_pools.extend(['write'])
+
         # Legacy support for old configurations without Thread Pools config
         if len(self.configured_thread_pools) == 0:
             self.thread_pools = list(self.configured_thread_pools)
