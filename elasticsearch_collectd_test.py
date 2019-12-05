@@ -23,7 +23,7 @@ from elasticsearch_collectd import remove_deprecated_elements
     )
 ])
 def test_remove_deprecated_elements(deprecated_elements, input_elements, version, expected_elements):
-    print deprecated_elements, input_elements, version, expected_elements
+    print(deprecated_elements, input_elements, version, expected_elements)
     elements = remove_deprecated_elements(deprecated_elements, input_elements, version)
     assert len(elements) == len(expected_elements)
     for i in range(len(elements)):

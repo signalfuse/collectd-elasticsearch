@@ -10,16 +10,10 @@ services:
       SF_INGEST_HOST: fake_sfx
     depends_on:
       - fake_sfx
-      - es17
       - es24
       - es53
       - es56
       - es63
-
-  es17:
-    build:
-      context: .
-      dockerfile: Dockerfile.es.1.7.6
 
   es24:
     build:

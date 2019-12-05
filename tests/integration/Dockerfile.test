@@ -1,4 +1,4 @@
-FROM python:2
+FROM python:3
 
 ADD test.py /opt/test.py
 CMD python -u /opt/test.py
