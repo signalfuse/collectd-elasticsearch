@@ -727,7 +727,7 @@ class Cluster(object):
 
         # Legacy support for old configurations without Thread Pools config
         if len(self.configured_thread_pools) == 0:
-            self.thread_pools = list(self.configured_thread_pools)
+            self.thread_pools = thread_pools
         else:
             # Filter out the thread pools that aren't specified by user
             self.thread_pools = [pool for pool in thread_pools if pool in self.configured_thread_pools]
