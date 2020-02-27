@@ -2,7 +2,7 @@ version: '2'
 jobs:
   build:
     docker:
-      - image: ubuntu:xenial
+      - image: ubuntu:bionic
     working_directory: ~/code
     steps:
       - setup_remote_docker
@@ -12,7 +12,7 @@ jobs:
             set -x
             VER="17.03.0-ce"
             apt-get update -q
-            apt-get install -yq curl python-pip
+            apt-get install -yq curl python3-pip
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -27,8 +27,8 @@ jobs:
           name: Run basic tests
           working_directory: ~/code/tests
           command: |
-            pip install pytest
-            pip install mock
+            python3 -m pip install pytest
+            python3 -m pip install mock
             bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
             ! grep -E 'FAILED|ERROR' /tmp/test.log > /dev/null || exit 1
       - run:

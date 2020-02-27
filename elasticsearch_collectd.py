@@ -907,7 +907,7 @@ class Cluster(object):
                 result = dig_it_up(json, key.path)
                 # update the index name in the type_instance to include
                 # the index as a dimensions
-                name = name.format(index_name=sanitize_type_instance(index_name))
+                name = name.format(index_name=sanitize_type_instance(index_name).decode("utf-8"))
                 self.dispatch_stat(result, name, key)
 
     def dispatch_stat(self, result, name, key, dimensions=None):

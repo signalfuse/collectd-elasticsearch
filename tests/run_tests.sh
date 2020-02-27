@@ -1,5 +1,5 @@
 #!/bin/bash
-PYTHON="python"
+PYTHON="python3"
 if [ ! -z "$1" ]; then
   PYTHON="$1"
 fi
