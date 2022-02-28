@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    branches:
+      - main
+  pull_request:
+
+env:
+  PYTHON_VERSION: "3.8"
+  REQUIREMENTS_PATH: "requirements.txt"
+  TEST_REQUIREMENTS_PATH: "tests/requirements.txt"
+
+jobs:
+  basic-tests:
+    name: basic-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v2
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+          key: v1-pip-${{ env.PYTHON_VERSION }}-${{ hashFiles(env.REQUIREMENTS_PATH) }}-${{ hashFiles(env.TEST_REQUIREMENTS_PATH) }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r ${{ env.REQUIREMENTS_PATH }}
+          pip install -r ${{ env.TEST_REQUIREMENTS_PATH }}
+
+      - name: Run basic tests
+        working-directory: tests
+        run: |
+          bash run_tests.sh | tee /tmp/test.log || true  # The test command always exits non-zero
+          ! grep -E 'FAILED|ERROR' /tmp/test.log > /dev/null || exit 1
+
+  integration-tests:
+    name: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v2
+
+      - name: Run integration tests
+        working-directory: tests/integration
+        run: |
+          chmod +x set_cluster_name wait_for_es
+          bash run.sh
